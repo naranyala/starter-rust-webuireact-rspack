@@ -1,0 +1,32 @@
+{
+  "name": "rustwebui-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "bun run rspack serve --config rspack.config.dev.ts",
+    "build": "bun run ../build-frontend.js",
+    "build:incremental": "bun run rspack build --config rspack.config.ts",
+    "preview": "bun run rspack serve --config rspack.config.dev.ts",
+    "clean": "rm -rf dist && rm -rf node_modules/.cache",
+    "lint": "bun run biome lint src",
+    "lint:fix": "bun run biome lint src --write",
+    "format": "bun run biome format src",
+    "format:fix": "bun run biome format src --write",
+    "check": "bun run biome check src",
+    "check:fix": "bun run biome check src --write"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "winbox": "^0.2.82"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.14",
+    "@rspack/cli": "^1.7.5",
+    "@rspack/core": "^1.7.5",
+    "@rspack/plugin-html": "^0.5.8",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.0.0"
+  }
+}

@@ -1,0 +1,39 @@
+# Application Configuration
+# This file controls the application's settings
+
+[app]
+name = "Rust WebUI SQLite Demo"
+version = "1.0.0"
+description = "A Rust WebUI application with SQLite integration"
+author = "Developer"
+website = "https://github.com/example/rustwebui-sqlite"
+
+[executable]
+name = "app"
+# Custom binary name (leave empty to use default)
+
+[database]
+path = "app.db"
+# SQLite database file path (relative to executable or absolute)
+create_sample_data = true
+# Whether to create sample data on first run
+
+[window]
+title = "Rust WebUI Application"
+width = 1200
+height = 800
+min_width = 800
+min_height = 600
+resizable = true
+
+[logging]
+level = "info"
+# Options: debug, info, warn, error
+file = "application.log"
+# Log file name (empty to disable file logging)
+append = true
+# Append to existing log file or overwrite
+
+[features]
+dark_mode = true
+show_tray_icon = false

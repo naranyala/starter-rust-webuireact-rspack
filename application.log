@@ -1,0 +1,557 @@
+[2026-02-07 17:08:46.622] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 17:08:46.989] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 17:09:02.391] INFO [rustwebui_anyimage_organizer] Application started successfully, waiting for events...
+[2026-02-07 17:09:09.545] INFO [rustwebui_anyimage_organizer] Application shutting down...
+[2026-02-07 17:09:13.773] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 17:09:13.957] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 17:09:29.255] INFO [rustwebui_anyimage_organizer] Application started successfully, waiting for events...
+[2026-02-07 17:09:36.409] INFO [rustwebui_anyimage_organizer] Application shutting down...
+[2026-02-07 17:13:47.218] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 17:13:47.405] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 17:13:52.600] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 17:13:52.802] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 17:14:02.724] INFO [rustwebui_anyimage_organizer] Application started successfully, waiting for events...
+[2026-02-07 17:14:09.884] INFO [rustwebui_anyimage_organizer] Application shutting down...
+[2026-02-07 17:28:11.297] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 17:28:11.511] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 17:28:26.883] INFO [rustwebui_anyimage_organizer] Application started successfully, waiting for events...
+[2026-02-07 17:28:34.001] INFO [rustwebui_anyimage_organizer] Application shutting down...
+[2026-02-07 21:32:15.784] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 21:32:16.527] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 21:34:06.935] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 21:34:07.224] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 21:39:07.179] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 21:39:07.491] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 21:40:42.622] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 21:40:43.059] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 21:42:32.813] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 21:42:33.120] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 21:44:48.049] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 21:44:48.970] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 21:48:54.600] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 21:48:54.925] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 21:51:18.892] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 21:51:19.132] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 21:54:13.324] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 21:54:13.785] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 21:55:58.921] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 21:55:59.204] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 21:56:51.241] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 21:56:51.713] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 22:00:12.101] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 22:00:12.307] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 22:00:39.120] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 22:00:39.370] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 22:07:09.040] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 22:07:09.371] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 22:11:49.305] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 22:12:06.972] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 22:12:07.165] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 22:12:22.554] INFO [rustwebui_anyimage_organizer] Application started successfully, waiting for events...
+[2026-02-07 22:16:14.844] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 22:16:15.291] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 22:16:30.739] INFO [rustwebui_anyimage_organizer] Application started successfully, waiting for events...
+[2026-02-07 22:16:37.934] INFO [rustwebui_anyimage_organizer] Application shutting down...
+[2026-02-07 22:21:01.785] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 22:21:02.304] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 22:25:19.071] INFO [rustwebui_anyimage_organizer] Dependency injection container initialized
+[2026-02-07 22:25:19.073] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 22:25:19.505] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 22:25:35.200] INFO [rustwebui_anyimage_organizer] Application started successfully, waiting for events...
+[2026-02-07 22:25:42.446] INFO [rustwebui_anyimage_organizer] Application shutting down...
+[2026-02-07 22:29:34.009] INFO [rustwebui_anyimage_organizer] Dependency injection container initialized
+[2026-02-07 22:29:34.010] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 22:29:34.479] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 22:29:50.116] INFO [rustwebui_anyimage_organizer] Application started successfully, waiting for events...
+[2026-02-07 22:29:57.295] INFO [rustwebui_anyimage_organizer] Application shutting down...
+[2026-02-07 22:31:28.089] INFO [rustwebui_anyimage_organizer] Dependency injection container initialized
+[2026-02-07 22:31:28.090] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 22:31:28.430] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 22:31:43.839] INFO [rustwebui_anyimage_organizer] Application started successfully, waiting for events...
+[2026-02-07 22:31:51.029] INFO [rustwebui_anyimage_organizer] Application shutting down...
+[2026-02-07 22:34:24.572] INFO [rustwebui_anyimage_organizer] Dependency injection container initialized
+[2026-02-07 22:34:24.573] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 22:34:24.941] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 22:34:40.361] INFO [rustwebui_anyimage_organizer] Application started successfully, waiting for events...
+[2026-02-07 22:34:47.492] INFO [rustwebui_anyimage_organizer] Application shutting down...
+[2026-02-07 22:41:47.167] INFO [rustwebui_anyimage_organizer] Dependency injection container initialized
+[2026-02-07 22:41:47.169] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 22:41:47.713] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 22:42:03.527] INFO [rustwebui_anyimage_organizer] Application started successfully, waiting for events...
+[2026-02-07 22:42:10.767] INFO [rustwebui_anyimage_organizer] Application shutting down...
+[2026-02-07 22:47:22.510] INFO [rustwebui_anyimage_organizer] Dependency injection container initialized
+[2026-02-07 22:47:22.510] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 22:47:22.800] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 22:47:38.169] INFO [rustwebui_anyimage_organizer] Application started successfully, waiting for events...
+[2026-02-07 22:47:45.326] INFO [rustwebui_anyimage_organizer] Application shutting down...
+[2026-02-07 22:48:27.608] INFO [rustwebui_anyimage_organizer] Dependency injection container initialized
+[2026-02-07 22:48:27.608] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 22:48:27.894] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 22:48:43.480] INFO [rustwebui_anyimage_organizer] Application started successfully, waiting for events...
+[2026-02-07 22:48:50.819] INFO [rustwebui_anyimage_organizer] Application shutting down...
+[2026-02-07 23:11:48.198] INFO [rustwebui_anyimage_organizer] Dependency injection container initialized
+[2026-02-07 23:11:48.198] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 23:11:48.199] INFO [rustwebui_anyimage_organizer::infrastructure::database] Database connection established: app.db
+[2026-02-07 23:11:48.199] INFO [rustwebui_anyimage_organizer] Database initialized successfully
+[2026-02-07 23:11:48.205] INFO [rustwebui_anyimage_organizer::infrastructure::database] Database schema initialized
+[2026-02-07 23:11:48.235] INFO [rustwebui_anyimage_organizer::infrastructure::database] Sample data inserted successfully
+[2026-02-07 23:11:48.235] INFO [rustwebui_anyimage_organizer::use_cases::handlers::db_handlers] Database handlers initialized
+[2026-02-07 23:11:48.675] INFO [rustwebui_anyimage_organizer::use_cases::handlers::db_handlers] Database handlers set up successfully
+[2026-02-07 23:11:48.675] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 23:12:04.294] INFO [rustwebui_anyimage_organizer] Application started successfully, waiting for events...
+[2026-02-07 23:12:11.429] INFO [rustwebui_anyimage_organizer] Application shutting down...
+[2026-02-07 23:20:21.150] INFO [rustwebui_anyimage_organizer] =============================================
+[2026-02-07 23:20:21.150] INFO [rustwebui_anyimage_organizer] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-07 23:20:21.150] INFO [rustwebui_anyimage_organizer] =============================================
+[2026-02-07 23:20:21.150] INFO [rustwebui_anyimage_organizer] Dependency injection container initialized
+[2026-02-07 23:20:21.150] INFO [rustwebui_anyimage_organizer] Application starting...
+[2026-02-07 23:20:21.150] INFO [rustwebui_anyimage_organizer] Database path: app.db
+[2026-02-07 23:20:21.151] INFO [rustwebui_anyimage_organizer::infrastructure::database] Database connection established: app.db
+[2026-02-07 23:20:21.151] INFO [rustwebui_anyimage_organizer] Database initialized successfully
+[2026-02-07 23:20:21.151] INFO [rustwebui_anyimage_organizer::infrastructure::database] Database schema initialized
+[2026-02-07 23:20:21.152] INFO [rustwebui_anyimage_organizer::infrastructure::database] Sample data already exists, skipping insertion
+[2026-02-07 23:20:21.152] INFO [rustwebui_anyimage_organizer] Sample data created (if not exists)
+[2026-02-07 23:20:21.152] INFO [rustwebui_anyimage_organizer::use_cases::handlers::db_handlers] Database handlers initialized
+[2026-02-07 23:20:21.326] INFO [rustwebui_anyimage_organizer::use_cases::handlers::db_handlers] Database handlers set up successfully
+[2026-02-07 23:20:21.326] INFO [rustwebui_anyimage_organizer] Window title: Rust WebUI Application
+[2026-02-07 23:20:21.326] INFO [rustwebui_anyimage_organizer] Loading application UI from dist/index.html
+[2026-02-07 23:20:36.621] INFO [rustwebui_anyimage_organizer] Application started successfully, waiting for events...
+[2026-02-07 23:20:36.621] INFO [rustwebui_anyimage_organizer] =============================================
+[2026-02-07 23:20:43.720] INFO [rustwebui_anyimage_organizer] Application shutting down...
+[2026-02-07 23:20:43.720] INFO [rustwebui_anyimage_organizer] =============================================
+[2026-02-07 23:43:18.377] INFO [rustwebui_app] =============================================
+[2026-02-07 23:43:18.377] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-07 23:43:18.377] INFO [rustwebui_app] =============================================
+[2026-02-07 23:43:18.377] INFO [rustwebui_app] Dependency injection container initialized
+[2026-02-07 23:43:18.377] INFO [rustwebui_app] Application starting...
+[2026-02-07 23:43:18.377] INFO [rustwebui_app] Database path: app.db
+[2026-02-07 23:43:18.378] INFO [rustwebui_app::infrastructure::database] Database connection established: app.db
+[2026-02-07 23:43:18.378] INFO [rustwebui_app] Database initialized successfully
+[2026-02-07 23:43:18.379] INFO [rustwebui_app::infrastructure::database] Database schema initialized
+[2026-02-07 23:43:18.380] INFO [rustwebui_app::infrastructure::database] Sample data already exists, skipping insertion
+[2026-02-07 23:43:18.380] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-07 23:43:18.380] INFO [rustwebui_app::use_cases::handlers::db_handlers] Database handlers initialized
+[2026-02-07 23:43:18.554] INFO [rustwebui_app::use_cases::handlers::db_handlers] Database handlers set up successfully
+[2026-02-07 23:43:18.555] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-07 23:43:18.555] INFO [rustwebui_app] Loading application UI from frontend/dist/index.html
+[2026-02-07 23:43:33.861] INFO [rustwebui_app] Application started successfully, waiting for events...
+[2026-02-07 23:43:33.861] INFO [rustwebui_app] =============================================
+[2026-02-07 23:43:40.968] INFO [rustwebui_app] Application shutting down...
+[2026-02-07 23:43:40.968] INFO [rustwebui_app] =============================================
+[2026-02-07 23:45:24.498] INFO [rustwebui_app] =============================================
+[2026-02-07 23:45:24.498] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-07 23:45:24.498] INFO [rustwebui_app] =============================================
+[2026-02-07 23:45:24.498] INFO [rustwebui_app] Dependency injection container initialized
+[2026-02-07 23:45:24.498] INFO [rustwebui_app] Application starting...
+[2026-02-07 23:45:24.498] INFO [rustwebui_app] Database path: app.db
+[2026-02-07 23:45:24.499] INFO [rustwebui_app::infrastructure::database] Database connection established: app.db
+[2026-02-07 23:45:24.499] INFO [rustwebui_app] Database initialized successfully
+[2026-02-07 23:45:24.499] INFO [rustwebui_app::infrastructure::database] Database schema initialized
+[2026-02-07 23:45:24.499] INFO [rustwebui_app::infrastructure::database] Sample data already exists, skipping insertion
+[2026-02-07 23:45:24.500] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-07 23:45:24.500] INFO [rustwebui_app::use_cases::handlers::db_handlers] Database handlers initialized
+[2026-02-07 23:45:39.007] INFO [rustwebui_app] =============================================
+[2026-02-07 23:45:39.007] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-07 23:45:39.008] INFO [rustwebui_app] =============================================
+[2026-02-07 23:45:39.008] INFO [rustwebui_app] Dependency injection container initialized
+[2026-02-07 23:45:39.008] INFO [rustwebui_app] Application starting...
+[2026-02-07 23:45:39.008] INFO [rustwebui_app] Database path: app.db
+[2026-02-07 23:45:39.009] INFO [rustwebui_app::infrastructure::database] Database connection established: app.db
+[2026-02-07 23:45:39.009] INFO [rustwebui_app] Database initialized successfully
+[2026-02-07 23:45:39.009] INFO [rustwebui_app::infrastructure::database] Database schema initialized
+[2026-02-07 23:45:39.010] INFO [rustwebui_app::infrastructure::database] Sample data already exists, skipping insertion
+[2026-02-07 23:45:39.010] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-07 23:45:39.010] INFO [rustwebui_app::use_cases::handlers::db_handlers] Database handlers initialized
+[2026-02-07 23:45:39.193] INFO [rustwebui_app::use_cases::handlers::db_handlers] Database handlers set up successfully
+[2026-02-07 23:45:39.193] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-07 23:45:39.193] INFO [rustwebui_app] Loading application UI from frontend/dist/index.html
+[2026-02-07 23:48:17.695] INFO [rustwebui_app] =============================================
+[2026-02-07 23:48:17.695] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-07 23:48:17.695] INFO [rustwebui_app] =============================================
+[2026-02-07 23:48:17.695] INFO [rustwebui_app] Dependency injection container initialized
+[2026-02-07 23:48:17.695] INFO [rustwebui_app] Application starting...
+[2026-02-07 23:48:17.695] INFO [rustwebui_app] Database path: app.db
+[2026-02-07 23:48:17.696] INFO [rustwebui_app::infrastructure::database] Database connection established: app.db
+[2026-02-07 23:48:17.696] INFO [rustwebui_app] Database initialized successfully
+[2026-02-07 23:48:17.696] INFO [rustwebui_app::infrastructure::database] Database schema initialized
+[2026-02-07 23:48:17.697] INFO [rustwebui_app::infrastructure::database] Sample data already exists, skipping insertion
+[2026-02-07 23:48:17.697] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-07 23:48:17.697] INFO [rustwebui_app::use_cases::handlers::db_handlers] Database handlers initialized
+[2026-02-07 23:48:17.958] INFO [rustwebui_app::use_cases::handlers::db_handlers] Database handlers set up successfully
+[2026-02-07 23:48:17.958] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-07 23:48:17.958] INFO [rustwebui_app] Loading application UI from frontend/dist/index.html
+[2026-02-07 23:48:53.293] INFO [rustwebui_app] =============================================
+[2026-02-07 23:48:53.294] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-07 23:48:53.294] INFO [rustwebui_app] =============================================
+[2026-02-07 23:48:53.294] INFO [rustwebui_app] Dependency injection container initialized
+[2026-02-07 23:48:53.294] INFO [rustwebui_app] Application starting...
+[2026-02-07 23:48:53.294] INFO [rustwebui_app] Database path: app.db
+[2026-02-07 23:48:53.295] INFO [rustwebui_app::infrastructure::database] Database connection established: app.db
+[2026-02-07 23:48:53.295] INFO [rustwebui_app] Database initialized successfully
+[2026-02-07 23:48:53.296] INFO [rustwebui_app::infrastructure::database] Database schema initialized
+[2026-02-07 23:48:53.296] INFO [rustwebui_app::infrastructure::database] Sample data already exists, skipping insertion
+[2026-02-07 23:48:53.296] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-07 23:48:53.296] INFO [rustwebui_app::use_cases::handlers::db_handlers] Database handlers initialized
+[2026-02-07 23:48:53.450] INFO [rustwebui_app::use_cases::handlers::db_handlers] Database handlers set up successfully
+[2026-02-07 23:48:53.450] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-07 23:48:53.451] INFO [rustwebui_app] Loading application UI from frontend/dist/index.html
+[2026-02-07 23:49:08.765] INFO [rustwebui_app] Application started successfully, waiting for events...
+[2026-02-07 23:49:08.765] INFO [rustwebui_app] =============================================
+[2026-02-07 23:49:15.930] INFO [rustwebui_app] Application shutting down...
+[2026-02-07 23:49:15.931] INFO [rustwebui_app] =============================================
+[2026-02-08 00:10:46.620] INFO [rustwebui_app] =============================================
+[2026-02-08 00:10:46.620] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-08 00:10:46.620] INFO [rustwebui_app] =============================================
+[2026-02-08 00:10:46.620] INFO [rustwebui_app] Dependency injection container initialized
+[2026-02-08 00:10:46.620] INFO [rustwebui_app] Application starting...
+[2026-02-08 00:10:46.620] INFO [rustwebui_app] Database path: app.db
+[2026-02-08 00:10:46.621] INFO [rustwebui_app::infrastructure::database] Database connection established: app.db
+[2026-02-08 00:10:46.621] INFO [rustwebui_app] Database initialized successfully
+[2026-02-08 00:10:46.621] INFO [rustwebui_app::infrastructure::database] Database schema initialized
+[2026-02-08 00:10:46.621] INFO [rustwebui_app::infrastructure::database] Sample data already exists, skipping insertion
+[2026-02-08 00:10:46.622] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-08 00:10:46.622] INFO [rustwebui_app::use_cases::handlers::db_handlers] Database handlers initialized
+[2026-02-08 00:10:46.780] INFO [rustwebui_app::use_cases::handlers::db_handlers] Database handlers set up successfully
+[2026-02-08 00:10:46.781] INFO [rustwebui_app::use_cases::handlers::sysinfo_handlers] System info handlers set up successfully
+[2026-02-08 00:10:46.781] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-08 00:10:46.781] INFO [rustwebui_app] Loading application UI from frontend/dist/index.html
+[2026-02-08 00:31:19.816] INFO [rustwebui_app] =============================================
+[2026-02-08 00:31:19.816] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-08 00:31:19.816] INFO [rustwebui_app] =============================================
+[2026-02-08 00:31:19.816] INFO [rustwebui_app] Dependency injection container initialized
+[2026-02-08 00:31:19.816] INFO [rustwebui_app] Application starting...
+[2026-02-08 00:31:19.816] INFO [rustwebui_app] Database path: app.db
+[2026-02-08 00:31:19.816] INFO [rustwebui_app::infrastructure::database] Database connection established: app.db
+[2026-02-08 00:31:19.816] INFO [rustwebui_app] Database initialized successfully
+[2026-02-08 00:31:19.817] INFO [rustwebui_app::infrastructure::database] Database schema initialized
+[2026-02-08 00:31:19.817] INFO [rustwebui_app::infrastructure::database] Sample data already exists, skipping insertion
+[2026-02-08 00:31:19.817] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-08 00:31:19.817] INFO [rustwebui_app::use_cases::handlers::db_handlers] Database handlers initialized
+[2026-02-08 00:31:19.969] INFO [rustwebui_app::use_cases::handlers::db_handlers] Database handlers set up successfully
+[2026-02-08 00:31:19.969] INFO [rustwebui_app::use_cases::handlers::sysinfo_handlers] System info handlers set up successfully
+[2026-02-08 00:31:19.969] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-08 00:31:19.969] INFO [rustwebui_app] Loading application UI from frontend/dist/index.html
+[2026-02-08 00:31:35.280] INFO [rustwebui_app] Application started successfully, waiting for events...
+[2026-02-08 00:31:35.280] INFO [rustwebui_app] =============================================
+[2026-02-08 00:31:42.419] INFO [rustwebui_app] Application shutting down...
+[2026-02-08 00:31:42.419] INFO [rustwebui_app] =============================================
+[2026-02-08 00:32:06.254] INFO [rustwebui_app] =============================================
+[2026-02-08 00:32:06.254] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-08 00:32:06.254] INFO [rustwebui_app] =============================================
+[2026-02-08 00:32:06.254] INFO [rustwebui_app] Dependency injection container initialized
+[2026-02-08 00:32:06.254] INFO [rustwebui_app] Application starting...
+[2026-02-08 00:32:06.254] INFO [rustwebui_app] Database path: app.db
+[2026-02-08 00:32:06.254] INFO [rustwebui_app::infrastructure::database] Database connection established: app.db
+[2026-02-08 00:32:06.254] INFO [rustwebui_app] Database initialized successfully
+[2026-02-08 00:32:06.255] INFO [rustwebui_app::infrastructure::database] Database schema initialized
+[2026-02-08 00:32:06.255] INFO [rustwebui_app::infrastructure::database] Sample data already exists, skipping insertion
+[2026-02-08 00:32:06.255] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-08 00:32:06.255] INFO [rustwebui_app::use_cases::handlers::db_handlers] Database handlers initialized
+[2026-02-08 00:32:06.406] INFO [rustwebui_app::use_cases::handlers::db_handlers] Database handlers set up successfully
+[2026-02-08 00:32:06.406] INFO [rustwebui_app::use_cases::handlers::sysinfo_handlers] System info handlers set up successfully
+[2026-02-08 00:32:06.406] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-08 00:32:06.406] INFO [rustwebui_app] Loading application UI from frontend/dist/index.html
+[2026-02-08 00:32:21.720] INFO [rustwebui_app] Application started successfully, waiting for events...
+[2026-02-08 00:32:21.721] INFO [rustwebui_app] =============================================
+[2026-02-08 11:51:51.721] INFO [rustwebui_app] =============================================
+[2026-02-08 11:51:51.721] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-08 11:51:51.721] INFO [rustwebui_app] =============================================
+[2026-02-08 11:51:51.721] INFO [rustwebui_app] Dependency injection container initialized
+[2026-02-08 11:51:51.721] INFO [rustwebui_app] Application starting...
+[2026-02-08 11:51:51.721] INFO [rustwebui_app] Database path: app.db
+[2026-02-08 11:51:51.722] INFO [rustwebui_app::infrastructure::database] Database connection established: app.db
+[2026-02-08 11:51:51.722] INFO [rustwebui_app] Database initialized successfully
+[2026-02-08 11:51:51.722] INFO [rustwebui_app::infrastructure::database] Database schema initialized
+[2026-02-08 11:51:51.722] INFO [rustwebui_app::infrastructure::database] Sample data already exists, skipping insertion
+[2026-02-08 11:51:51.722] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-08 11:51:51.722] INFO [rustwebui_app::use_cases::handlers::db_handlers] Database handlers initialized
+[2026-02-08 11:51:51.911] INFO [rustwebui_app::use_cases::handlers::db_handlers] Database handlers set up successfully
+[2026-02-08 11:51:51.912] INFO [rustwebui_app::use_cases::handlers::sysinfo_handlers] System info handlers set up successfully
+[2026-02-08 11:51:51.912] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-08 11:51:51.912] INFO [rustwebui_app] Loading application UI from frontend/dist/index.html
+[2026-02-08 11:52:07.234] INFO [rustwebui_app] Application started successfully, waiting for events...
+[2026-02-08 11:52:07.234] INFO [rustwebui_app] =============================================
+[2026-02-08 11:52:14.367] INFO [rustwebui_app] Application shutting down...
+[2026-02-08 11:52:14.367] INFO [rustwebui_app] =============================================
+[2026-02-08 11:57:56.841] INFO [rustwebui_app] =============================================
+[2026-02-08 11:57:56.841] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-08 11:57:56.841] INFO [rustwebui_app] =============================================
+[2026-02-08 11:57:56.841] INFO [rustwebui_app] Dependency injection container initialized
+[2026-02-08 11:57:56.841] INFO [rustwebui_app] Application starting...
+[2026-02-08 11:57:56.841] INFO [rustwebui_app] Database path: app.db
+[2026-02-08 11:57:56.842] INFO [rustwebui_app::infrastructure::database] Database connection established: app.db
+[2026-02-08 11:57:56.842] INFO [rustwebui_app] Database initialized successfully
+[2026-02-08 11:57:56.842] INFO [rustwebui_app::infrastructure::database] Database schema initialized
+[2026-02-08 11:57:56.842] INFO [rustwebui_app::infrastructure::database] Sample data already exists, skipping insertion
+[2026-02-08 11:57:56.843] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-08 11:57:56.843] INFO [rustwebui_app::use_cases::handlers::db_handlers] Database handlers initialized
+[2026-02-08 11:57:57.012] INFO [rustwebui_app::use_cases::handlers::db_handlers] Database handlers set up successfully
+[2026-02-08 11:57:57.012] INFO [rustwebui_app::use_cases::handlers::sysinfo_handlers] System info handlers set up successfully
+[2026-02-08 11:57:57.012] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-08 11:57:57.012] INFO [rustwebui_app] Loading application UI from frontend/dist/index.html
+[2026-02-08 11:58:12.334] INFO [rustwebui_app] Application started successfully, waiting for events...
+[2026-02-08 11:58:12.334] INFO [rustwebui_app] =============================================
+[2026-02-08 11:58:18.560] INFO [rustwebui_app] Application shutting down...
+[2026-02-08 11:58:18.561] INFO [rustwebui_app] =============================================
+[2026-02-08 23:39:59.113] INFO [rustwebui_app] =============================================
+[2026-02-08 23:39:59.113] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-08 23:39:59.113] INFO [rustwebui_app] =============================================
+[2026-02-08 23:39:59.114] INFO [rustwebui_app] Dependency injection container initialized
+[2026-02-08 23:39:59.114] INFO [rustwebui_app] Application starting...
+[2026-02-08 23:39:59.114] INFO [rustwebui_app] Database path: app.db
+[2026-02-08 23:39:59.115] INFO [rustwebui_app::infrastructure::database] Database connection established: app.db
+[2026-02-08 23:39:59.115] INFO [rustwebui_app] Database initialized successfully
+[2026-02-08 23:39:59.116] INFO [rustwebui_app::infrastructure::database] Database schema initialized
+[2026-02-08 23:39:59.116] INFO [rustwebui_app::infrastructure::database] Sample data already exists, skipping insertion
+[2026-02-08 23:39:59.116] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-08 23:39:59.116] INFO [rustwebui_app::use_cases::handlers::db_handlers] Database handlers initialized
+[2026-02-08 23:39:59.307] INFO [rustwebui_app::use_cases::handlers::db_handlers] Database handlers set up successfully
+[2026-02-08 23:39:59.308] INFO [rustwebui_app::use_cases::handlers::sysinfo_handlers] System info handlers set up successfully
+[2026-02-08 23:39:59.308] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-08 23:39:59.308] INFO [rustwebui_app] Loading application UI from frontend/dist/index.html
+[2026-02-09 08:55:55.923] INFO [rustwebui_app] =============================================
+[2026-02-09 08:55:55.924] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-09 08:55:55.924] INFO [rustwebui_app] =============================================
+[2026-02-09 08:55:55.924] INFO [rustwebui_app] Application starting...
+[2026-02-09 08:55:55.924] INFO [rustwebui_app] Database path: app.db
+[2026-02-09 08:58:05.167] INFO [rustwebui_app] =============================================
+[2026-02-09 08:58:05.167] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-09 08:58:05.167] INFO [rustwebui_app] =============================================
+[2026-02-09 08:58:05.167] INFO [rustwebui_app] Application starting...
+[2026-02-09 08:58:05.167] INFO [rustwebui_app] Database path: app.db
+[2026-02-09 08:58:42.543] INFO [rustwebui_app] =============================================
+[2026-02-09 08:58:42.543] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-09 08:58:42.543] INFO [rustwebui_app] =============================================
+[2026-02-09 08:58:42.543] INFO [rustwebui_app] Application starting...
+[2026-02-09 08:58:42.543] INFO [rustwebui_app] Database path: app.db
+[2026-02-09 08:59:01.490] INFO [rustwebui_app] =============================================
+[2026-02-09 08:59:01.490] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-09 08:59:01.490] INFO [rustwebui_app] =============================================
+[2026-02-09 08:59:01.490] INFO [rustwebui_app] Application starting...
+[2026-02-09 08:59:01.490] INFO [rustwebui_app] Database path: app.db
+[2026-02-09 08:59:30.083] INFO [rustwebui_app] =============================================
+[2026-02-09 08:59:30.083] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-09 08:59:30.083] INFO [rustwebui_app] =============================================
+[2026-02-09 08:59:30.083] INFO [rustwebui_app] Application starting...
+[2026-02-09 08:59:30.083] INFO [rustwebui_app] Database path: app.db
+[2026-02-09 09:00:01.882] INFO [rustwebui_app] =============================================
+[2026-02-09 09:00:01.883] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-09 09:00:01.883] INFO [rustwebui_app] =============================================
+[2026-02-09 09:00:01.883] INFO [rustwebui_app] Application starting...
+[2026-02-09 09:00:01.884] INFO [rustwebui_app] Database path: app.db
+[2026-02-09 09:00:26.881] INFO [rustwebui_app] =============================================
+[2026-02-09 09:00:26.881] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-09 09:00:26.881] INFO [rustwebui_app] =============================================
+[2026-02-09 09:00:26.881] INFO [rustwebui_app] Application starting...
+[2026-02-09 09:00:26.881] INFO [rustwebui_app] Database path: app.db
+[2026-02-09 09:01:05.231] INFO [rustwebui_app] =============================================
+[2026-02-09 09:01:05.232] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-09 09:01:05.232] INFO [rustwebui_app] =============================================
+[2026-02-09 09:01:05.232] INFO [rustwebui_app] Application starting...
+[2026-02-09 09:01:05.232] INFO [rustwebui_app] Database path: app.db
+[2026-02-09 09:01:05.235] INFO [rustwebui_app] Database initialized successfully
+[2026-02-09 09:01:05.235] INFO [rustwebui_app::core] Database schema initialized
+[2026-02-09 09:01:05.236] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-09 09:01:06.094] INFO [rustwebui_app::handlers] UI handlers registered
+[2026-02-09 09:01:06.096] INFO [rustwebui_app::handlers] Counter handlers registered
+[2026-02-09 09:01:06.097] INFO [rustwebui_app::handlers] Database handlers registered
+[2026-02-09 09:01:06.098] INFO [rustwebui_app::handlers] System info handlers registered
+[2026-02-09 09:01:06.100] INFO [rustwebui_app::handlers] Utility handlers registered
+[2026-02-09 09:01:06.100] INFO [rustwebui_app::handlers] Advanced handlers registered
+[2026-02-09 09:01:06.102] INFO [rustwebui_app::handlers] Enhanced handlers registered
+[2026-02-09 09:01:06.102] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-09 09:01:06.102] INFO [rustwebui_app] Loading application UI from frontend/dist/index.html
+[2026-02-09 09:10:10.472] INFO [rustwebui_app] =============================================
+[2026-02-09 09:10:10.473] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-09 09:10:10.473] INFO [rustwebui_app] =============================================
+[2026-02-09 09:10:10.473] INFO [rustwebui_app] Application starting...
+[2026-02-09 09:10:10.474] INFO [rustwebui_app] Database path: app.db
+[2026-02-09 09:10:10.483] INFO [rustwebui_app] Database initialized successfully
+[2026-02-09 09:10:10.484] INFO [rustwebui_app::core] Database schema initialized
+[2026-02-09 09:10:10.484] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-09 09:10:11.030] INFO [rustwebui_app::handlers] UI handlers registered
+[2026-02-09 09:10:11.031] INFO [rustwebui_app::handlers] Counter handlers registered
+[2026-02-09 09:10:11.038] INFO [rustwebui_app::handlers] Database handlers registered
+[2026-02-09 09:10:11.040] INFO [rustwebui_app::handlers] System info handlers registered
+[2026-02-09 09:10:11.042] INFO [rustwebui_app::handlers] Utility handlers registered
+[2026-02-09 09:10:11.042] INFO [rustwebui_app::handlers] Advanced handlers registered
+[2026-02-09 09:10:11.043] INFO [rustwebui_app::handlers] Enhanced handlers registered
+[2026-02-09 09:10:11.043] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-09 09:10:11.043] INFO [rustwebui_app] Loading application UI from frontend/dist/index.html
+[2026-02-09 09:10:26.521] INFO [rustwebui_app] Application started successfully, waiting for events...
+[2026-02-09 09:10:26.521] INFO [rustwebui_app] =============================================
+[2026-02-09 09:10:33.873] INFO [rustwebui_app] Application shutting down...
+[2026-02-09 09:10:33.874] INFO [rustwebui_app] =============================================
+[2026-02-09 09:16:05.214] INFO [rustwebui_app] =============================================
+[2026-02-09 09:16:05.215] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-09 09:16:05.215] INFO [rustwebui_app] =============================================
+[2026-02-09 09:16:05.215] INFO [rustwebui_app] Application starting...
+[2026-02-09 09:16:05.215] INFO [rustwebui_app] Database path: app.db
+[2026-02-09 09:16:05.217] INFO [rustwebui_app] Database initialized successfully
+[2026-02-09 09:16:05.217] INFO [rustwebui_app::core] Database schema initialized
+[2026-02-09 09:16:05.217] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-09 09:16:05.502] INFO [rustwebui_app::handlers] UI handlers registered
+[2026-02-09 09:16:05.502] INFO [rustwebui_app::handlers] Counter handlers registered
+[2026-02-09 09:16:05.503] INFO [rustwebui_app::handlers] Database handlers registered
+[2026-02-09 09:16:05.503] INFO [rustwebui_app::handlers] System info handlers registered
+[2026-02-09 09:16:05.508] INFO [rustwebui_app::handlers] Utility handlers registered
+[2026-02-09 09:16:05.508] INFO [rustwebui_app::handlers] Advanced handlers registered
+[2026-02-09 09:16:05.509] INFO [rustwebui_app::handlers] Enhanced handlers registered
+[2026-02-09 09:16:05.509] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-09 09:16:05.509] INFO [rustwebui_app] Loading application UI from frontend/dist/index.html
+[2026-02-09 09:24:39.512] INFO [rustwebui_app] =============================================
+[2026-02-09 09:24:39.512] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-09 09:24:39.513] INFO [rustwebui_app] =============================================
+[2026-02-09 09:24:39.513] INFO [rustwebui_app] Application starting...
+[2026-02-09 09:24:39.513] INFO [rustwebui_app] Database path: app.db
+[2026-02-09 09:24:39.515] INFO [rustwebui_app] Database initialized successfully
+[2026-02-09 09:24:39.516] INFO [rustwebui_app::core] Database schema initialized
+[2026-02-09 09:24:39.516] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-09 09:24:39.780] INFO [rustwebui_app::handlers] UI handlers registered
+[2026-02-09 09:24:39.781] INFO [rustwebui_app::handlers] Counter handlers registered
+[2026-02-09 09:24:39.781] INFO [rustwebui_app::handlers] Database handlers registered
+[2026-02-09 09:24:39.781] INFO [rustwebui_app::handlers] System info handlers registered
+[2026-02-09 09:24:39.782] INFO [rustwebui_app::handlers] Utility handlers registered
+[2026-02-09 09:24:39.782] INFO [rustwebui_app::handlers] Advanced handlers registered
+[2026-02-09 09:24:39.783] INFO [rustwebui_app::handlers] Enhanced handlers registered
+[2026-02-09 09:24:39.783] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-09 09:24:39.783] INFO [rustwebui_app] Loading application UI from frontend/dist/index.html
+[2026-02-09 09:25:55.586] INFO [rustwebui_app] =============================================
+[2026-02-09 09:25:55.587] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-09 09:25:55.587] INFO [rustwebui_app] =============================================
+[2026-02-09 09:25:55.587] INFO [rustwebui_app] Application starting...
+[2026-02-09 09:25:55.587] INFO [rustwebui_app] Database path: app.db
+[2026-02-09 09:25:55.592] INFO [rustwebui_app] Database initialized successfully
+[2026-02-09 09:25:55.592] INFO [rustwebui_app::core] Database schema initialized
+[2026-02-09 09:25:55.592] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-09 09:25:55.845] INFO [rustwebui_app::handlers] UI handlers registered
+[2026-02-09 09:25:55.846] INFO [rustwebui_app::handlers] Counter handlers registered
+[2026-02-09 09:25:55.846] INFO [rustwebui_app::handlers] Database handlers registered
+[2026-02-09 09:25:55.846] INFO [rustwebui_app::handlers] System info handlers registered
+[2026-02-09 09:25:55.847] INFO [rustwebui_app::handlers] Utility handlers registered
+[2026-02-09 09:25:55.847] INFO [rustwebui_app::handlers] Advanced handlers registered
+[2026-02-09 09:25:55.848] INFO [rustwebui_app::handlers] Enhanced handlers registered
+[2026-02-09 09:25:55.848] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-09 09:25:55.848] INFO [rustwebui_app] Loading application UI from frontend/dist/index.html
+[2026-02-09 09:26:13.938] INFO [rustwebui_app] =============================================
+[2026-02-09 09:26:13.938] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-09 09:26:13.938] INFO [rustwebui_app] =============================================
+[2026-02-09 09:26:13.938] INFO [rustwebui_app] Application starting...
+[2026-02-09 09:26:13.938] INFO [rustwebui_app] Database path: app.db
+[2026-02-09 09:26:13.939] INFO [rustwebui_app] Database initialized successfully
+[2026-02-09 09:26:13.939] INFO [rustwebui_app::core] Database schema initialized
+[2026-02-09 09:26:13.939] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-09 09:26:14.128] INFO [rustwebui_app::handlers] UI handlers registered
+[2026-02-09 09:26:14.128] INFO [rustwebui_app::handlers] Counter handlers registered
+[2026-02-09 09:26:14.128] INFO [rustwebui_app::handlers] Database handlers registered
+[2026-02-09 09:26:14.129] INFO [rustwebui_app::handlers] System info handlers registered
+[2026-02-09 09:26:14.129] INFO [rustwebui_app::handlers] Utility handlers registered
+[2026-02-09 09:26:14.130] INFO [rustwebui_app::handlers] Advanced handlers registered
+[2026-02-09 09:26:14.130] INFO [rustwebui_app::handlers] Enhanced handlers registered
+[2026-02-09 09:26:14.130] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-09 09:26:14.130] INFO [rustwebui_app] Loading application UI from frontend/dist/index.html
+[2026-02-09 09:27:59.348] INFO [rustwebui_app] =============================================
+[2026-02-09 09:27:59.348] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-09 09:27:59.348] INFO [rustwebui_app] =============================================
+[2026-02-09 09:27:59.348] INFO [rustwebui_app] Application starting...
+[2026-02-09 09:27:59.348] INFO [rustwebui_app] Database path: app.db
+[2026-02-09 09:27:59.351] INFO [rustwebui_app] Database initialized successfully
+[2026-02-09 09:27:59.351] INFO [rustwebui_app::core] Database schema initialized
+[2026-02-09 09:27:59.351] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-09 09:27:59.564] INFO [rustwebui_app::handlers] UI handlers registered
+[2026-02-09 09:27:59.565] INFO [rustwebui_app::handlers] Counter handlers registered
+[2026-02-09 09:27:59.565] INFO [rustwebui_app::handlers] Database handlers registered
+[2026-02-09 09:27:59.566] INFO [rustwebui_app::handlers] System info handlers registered
+[2026-02-09 09:27:59.566] INFO [rustwebui_app::handlers] Utility handlers registered
+[2026-02-09 09:27:59.567] INFO [rustwebui_app::handlers] Advanced handlers registered
+[2026-02-09 09:27:59.567] INFO [rustwebui_app::handlers] Enhanced handlers registered
+[2026-02-09 09:27:59.567] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-09 09:27:59.567] INFO [rustwebui_app] Loading application UI from frontend/dist/index.html
+[2026-02-09 09:28:14.951] INFO [rustwebui_app] Application started successfully, waiting for events...
+[2026-02-09 09:28:14.951] INFO [rustwebui_app] =============================================
+[2026-02-09 09:28:22.188] INFO [rustwebui_app] Application shutting down...
+[2026-02-09 09:28:22.188] INFO [rustwebui_app] =============================================
+[2026-02-09 09:34:58.865] INFO [rustwebui_app] =============================================
+[2026-02-09 09:34:58.866] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-09 09:34:58.866] INFO [rustwebui_app] =============================================
+[2026-02-09 09:34:58.866] INFO [rustwebui_app] Application starting...
+[2026-02-09 09:34:58.867] INFO [rustwebui_app] Database path: app.db
+[2026-02-09 09:34:58.876] INFO [rustwebui_app] Database initialized successfully
+[2026-02-09 09:34:58.877] INFO [rustwebui_app::core] Database schema initialized
+[2026-02-09 09:34:58.877] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-09 09:34:59.165] INFO [rustwebui_app::handlers] UI handlers registered
+[2026-02-09 09:34:59.165] INFO [rustwebui_app::handlers] Counter handlers registered
+[2026-02-09 09:34:59.166] INFO [rustwebui_app::handlers] Database handlers registered
+[2026-02-09 09:34:59.166] INFO [rustwebui_app::handlers] System info handlers registered
+[2026-02-09 09:34:59.167] INFO [rustwebui_app::handlers] Utility handlers registered
+[2026-02-09 09:34:59.167] INFO [rustwebui_app::handlers] Advanced handlers registered
+[2026-02-09 09:34:59.168] INFO [rustwebui_app::handlers] Enhanced handlers registered
+[2026-02-09 09:34:59.168] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-09 09:34:59.168] INFO [rustwebui_app] Loading application UI from frontend/dist/index.html
+[2026-02-09 09:35:14.574] INFO [rustwebui_app] Application started successfully, waiting for events...
+[2026-02-09 09:35:14.574] INFO [rustwebui_app] =============================================
+[2026-02-09 09:35:21.770] INFO [rustwebui_app] Application shutting down...
+[2026-02-09 09:35:21.771] INFO [rustwebui_app] =============================================
+[2026-02-09 09:57:27.557] INFO [rustwebui_app] =============================================
+[2026-02-09 09:57:27.557] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-09 09:57:27.557] INFO [rustwebui_app] =============================================
+[2026-02-09 09:57:27.558] INFO [rustwebui_app] Application starting...
+[2026-02-09 09:57:27.558] INFO [rustwebui_app] Database path: app.db
+[2026-02-09 09:57:27.566] INFO [rustwebui_app] Database initialized successfully
+[2026-02-09 09:57:27.566] INFO [rustwebui_app::core] Database schema initialized
+[2026-02-09 09:57:27.567] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-09 09:57:27.788] INFO [rustwebui_app::handlers] UI handlers registered
+[2026-02-09 09:57:27.788] INFO [rustwebui_app::handlers] Counter handlers registered
+[2026-02-09 09:57:27.789] INFO [rustwebui_app::handlers] Database handlers registered
+[2026-02-09 09:57:27.789] INFO [rustwebui_app::handlers] System info handlers registered
+[2026-02-09 09:57:27.790] INFO [rustwebui_app::handlers] Utility handlers registered
+[2026-02-09 09:57:27.790] INFO [rustwebui_app::handlers] Advanced handlers registered
+[2026-02-09 09:57:27.791] INFO [rustwebui_app::handlers] Enhanced handlers registered
+[2026-02-09 09:57:27.791] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-09 09:57:27.791] INFO [rustwebui_app] Loading application UI from frontend/dist/index.html
+[2026-02-09 09:57:43.163] INFO [rustwebui_app] Application started successfully, waiting for events...
+[2026-02-09 09:57:43.163] INFO [rustwebui_app] =============================================
+[2026-02-09 09:57:50.382] INFO [rustwebui_app] Application shutting down...
+[2026-02-09 09:57:50.383] INFO [rustwebui_app] =============================================
+[2026-02-09 15:57:18.247] INFO [rustwebui_app] =============================================
+[2026-02-09 15:57:18.247] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-09 15:57:18.247] INFO [rustwebui_app] =============================================
+[2026-02-09 15:57:18.247] INFO [rustwebui_app] Application starting...
+[2026-02-09 15:57:18.247] INFO [rustwebui_app] Database path: app.db
+[2026-02-09 15:57:18.249] INFO [rustwebui_app] Database initialized successfully
+[2026-02-09 15:57:18.249] INFO [rustwebui_app::core] Database schema initialized
+[2026-02-09 15:57:18.249] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-09 15:57:18.611] INFO [rustwebui_app::handlers] UI handlers registered
+[2026-02-09 15:57:18.612] INFO [rustwebui_app::handlers] Counter handlers registered
+[2026-02-09 15:57:18.613] INFO [rustwebui_app::handlers] Database handlers registered
+[2026-02-09 15:57:18.614] INFO [rustwebui_app::handlers] System info handlers registered
+[2026-02-09 15:57:18.615] INFO [rustwebui_app::handlers] Utility handlers registered
+[2026-02-09 15:57:18.616] INFO [rustwebui_app::handlers] Advanced handlers registered
+[2026-02-09 15:57:18.617] INFO [rustwebui_app::handlers] Enhanced handlers registered
+[2026-02-09 15:57:18.617] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-09 15:57:18.617] INFO [rustwebui_app] Loading application UI from frontend/dist/index.html
+[2026-02-09 15:57:34.051] INFO [rustwebui_app] Application started successfully, waiting for events...
+[2026-02-09 15:57:34.051] INFO [rustwebui_app] =============================================
+[2026-02-09 15:57:40.398] INFO [rustwebui_app] Application shutting down...
+[2026-02-09 15:57:40.398] INFO [rustwebui_app] =============================================
+[2026-02-09 16:04:06.823] INFO [rustwebui_app] =============================================
+[2026-02-09 16:04:06.824] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-09 16:04:06.824] INFO [rustwebui_app] =============================================
+[2026-02-09 16:04:06.824] INFO [rustwebui_app] Application starting...
+[2026-02-09 16:04:06.825] INFO [rustwebui_app] Database path: app.db
+[2026-02-09 16:04:06.833] INFO [rustwebui_app] Database initialized successfully
+[2026-02-09 16:04:06.833] INFO [rustwebui_app::core] Database schema initialized
+[2026-02-09 16:04:06.834] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-09 16:04:07.403] INFO [rustwebui_app::handlers] UI handlers registered
+[2026-02-09 16:04:07.404] INFO [rustwebui_app::handlers] Counter handlers registered
+[2026-02-09 16:04:07.406] INFO [rustwebui_app::handlers] Database handlers registered
+[2026-02-09 16:04:07.407] INFO [rustwebui_app::handlers] System info handlers registered
+[2026-02-09 16:04:07.408] INFO [rustwebui_app::handlers] Utility handlers registered
+[2026-02-09 16:04:07.409] INFO [rustwebui_app::handlers] Advanced handlers registered
+[2026-02-09 16:04:07.411] INFO [rustwebui_app::handlers] Enhanced handlers registered
+[2026-02-09 16:04:07.411] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-09 16:04:07.411] INFO [rustwebui_app] Loading application UI from frontend/dist/index.html
+[2026-02-09 16:04:23.089] INFO [rustwebui_app] Application started successfully, waiting for events...
+[2026-02-09 16:04:23.090] INFO [rustwebui_app] =============================================
+[2026-02-09 16:04:30.304] INFO [rustwebui_app] Application shutting down...
+[2026-02-09 16:04:30.304] INFO [rustwebui_app] =============================================
