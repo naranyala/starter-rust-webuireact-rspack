@@ -555,3 +555,90 @@
 [2026-02-09 16:04:23.090] INFO [rustwebui_app] =============================================
 [2026-02-09 16:04:30.304] INFO [rustwebui_app] Application shutting down...
 [2026-02-09 16:04:30.304] INFO [rustwebui_app] =============================================
+[2026-02-09 16:40:24.963] INFO [rustwebui_app] =============================================
+[2026-02-09 16:40:24.963] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-09 16:40:24.963] INFO [rustwebui_app] =============================================
+[2026-02-09 16:40:24.963] INFO [rustwebui_app] Application starting...
+[2026-02-09 16:40:24.963] INFO [rustwebui_app] Database path: app.db
+[2026-02-09 16:40:24.964] INFO [rustwebui_app] Database initialized successfully
+[2026-02-09 16:40:24.964] INFO [rustwebui_app::core] Database schema initialized
+[2026-02-09 16:40:24.964] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-09 16:40:24.964] INFO [rustwebui_app] Starting HTTP server on port 8080 for frontend files
+[2026-02-09 16:40:24.964] INFO [rustwebui_app] Serving files from: /run/media/naranyala/Data/projects-remote/starter-rust-webuireact-rspack/frontend/dist
+[2026-02-09 16:40:24.964] INFO [rustwebui_app] HTTP server listening on http://localhost:8080
+[2026-02-09 16:40:25.230] INFO [rustwebui_app::handlers] UI handlers registered
+[2026-02-09 16:40:25.230] INFO [rustwebui_app::handlers] Counter handlers registered
+[2026-02-09 16:40:25.231] INFO [rustwebui_app::handlers] Database handlers registered
+[2026-02-09 16:40:25.231] INFO [rustwebui_app::handlers] System info handlers registered
+[2026-02-09 16:40:25.232] INFO [rustwebui_app::handlers] Utility handlers registered
+[2026-02-09 16:40:25.232] INFO [rustwebui_app::handlers] Advanced handlers registered
+[2026-02-09 16:40:25.232] INFO [rustwebui_app::handlers] Enhanced handlers registered
+[2026-02-09 16:40:25.232] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-09 16:40:25.233] INFO [rustwebui_app] Loading application UI from http://localhost:8080
+[2026-02-09 16:40:25.863] INFO [rustwebui_app] HTTP Request: / -> "frontend/dist/index.html"
+[2026-02-09 16:40:25.884] INFO [rustwebui_app] HTTP Request: /static/css/winbox.min.css -> "frontend/dist/static/css/winbox.min.css"
+[2026-02-09 16:40:25.884] INFO [rustwebui_app] HTTP Request: /static/js/winbox.min.js -> "frontend/dist/static/js/winbox.min.js"
+[2026-02-09 16:40:25.885] INFO [rustwebui_app] HTTP Request: /static/js/vendors.7740078c.js -> "frontend/dist/static/js/vendors.7740078c.js"
+[2026-02-09 16:40:25.887] INFO [rustwebui_app] HTTP Request: /static/js/index.47811421.js -> "frontend/dist/static/js/index.47811421.js"
+[2026-02-09 16:40:40.547] INFO [rustwebui_app] Application started successfully, waiting for events...
+[2026-02-09 16:40:40.548] INFO [rustwebui_app] =============================================
+[2026-02-09 16:40:42.655] INFO [rustwebui_app] Application shutting down...
+[2026-02-09 16:40:42.656] INFO [rustwebui_app] =============================================
+[2026-02-09 16:42:31.224] INFO [rustwebui_app] =============================================
+[2026-02-09 16:42:31.224] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-09 16:42:31.224] INFO [rustwebui_app] =============================================
+[2026-02-09 16:42:31.224] INFO [rustwebui_app] Application starting...
+[2026-02-09 16:42:31.224] INFO [rustwebui_app] Database path: app.db
+[2026-02-09 16:42:31.225] INFO [rustwebui_app] Database initialized successfully
+[2026-02-09 16:42:31.225] INFO [rustwebui_app::core] Database schema initialized
+[2026-02-09 16:42:31.225] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-09 16:42:31.225] INFO [rustwebui_app] Starting HTTP server on port 8080 for frontend files
+[2026-02-09 16:42:31.225] INFO [rustwebui_app] Serving files from: /run/media/naranyala/Data/projects-remote/starter-rust-webuireact-rspack/frontend/dist
+[2026-02-09 16:42:31.225] INFO [rustwebui_app] HTTP server listening on http://localhost:8080
+[2026-02-09 16:42:31.506] INFO [rustwebui_app::handlers] UI handlers registered
+[2026-02-09 16:42:31.506] INFO [rustwebui_app::handlers] Counter handlers registered
+[2026-02-09 16:42:31.507] INFO [rustwebui_app::handlers] Database handlers registered
+[2026-02-09 16:42:31.507] INFO [rustwebui_app::handlers] System info handlers registered
+[2026-02-09 16:42:31.508] INFO [rustwebui_app::handlers] Utility handlers registered
+[2026-02-09 16:42:31.508] INFO [rustwebui_app::handlers] Advanced handlers registered
+[2026-02-09 16:42:31.508] INFO [rustwebui_app::handlers] Enhanced handlers registered
+[2026-02-09 16:42:31.508] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-09 16:42:31.508] INFO [rustwebui_app] Loading application UI from http://localhost:8080
+[2026-02-09 16:42:32.176] INFO [rustwebui_app] HTTP Request: / -> "frontend/dist/index.html"
+[2026-02-09 16:42:32.182] INFO [rustwebui_app] HTTP Request: /static/css/winbox.min.css -> "frontend/dist/static/css/winbox.min.css"
+[2026-02-09 16:42:32.184] INFO [rustwebui_app] HTTP Request: /static/js/winbox.min.js -> "frontend/dist/static/js/winbox.min.js"
+[2026-02-09 16:42:32.184] INFO [rustwebui_app] HTTP Request: /static/js/vendors.7740078c.js -> "frontend/dist/static/js/vendors.7740078c.js"
+[2026-02-09 16:42:32.187] INFO [rustwebui_app] HTTP Request: /static/js/index.47811421.js -> "frontend/dist/static/js/index.47811421.js"
+[2026-02-09 16:42:46.827] INFO [rustwebui_app] Application started successfully, waiting for events...
+[2026-02-09 16:42:46.828] INFO [rustwebui_app] =============================================
+[2026-02-09 16:42:48.969] INFO [rustwebui_app] Application shutting down...
+[2026-02-09 16:42:48.970] INFO [rustwebui_app] =============================================
+[2026-02-09 16:51:27.223] INFO [rustwebui_app] =============================================
+[2026-02-09 16:51:27.223] INFO [rustwebui_app] Starting: Rust WebUI SQLite Demo v1.0.0
+[2026-02-09 16:51:27.223] INFO [rustwebui_app] =============================================
+[2026-02-09 16:51:27.224] INFO [rustwebui_app] Application starting...
+[2026-02-09 16:51:27.224] INFO [rustwebui_app] Database path: app.db
+[2026-02-09 16:51:27.226] INFO [rustwebui_app] Database initialized successfully
+[2026-02-09 16:51:27.227] INFO [rustwebui_app::core] Database schema initialized
+[2026-02-09 16:51:27.227] INFO [rustwebui_app] Sample data created (if not exists)
+[2026-02-09 16:51:27.227] INFO [rustwebui_app] Starting HTTP server on port 8080 for frontend files
+[2026-02-09 16:51:27.228] INFO [rustwebui_app] Serving files from: /run/media/naranyala/Data/projects-remote/starter-rust-webuireact-rspack/frontend/dist
+[2026-02-09 16:51:27.228] INFO [rustwebui_app] HTTP server listening on http://localhost:8080
+[2026-02-09 16:51:27.489] INFO [rustwebui_app::handlers] UI handlers registered
+[2026-02-09 16:51:27.489] INFO [rustwebui_app::handlers] Counter handlers registered
+[2026-02-09 16:51:27.490] INFO [rustwebui_app::handlers] Database handlers registered
+[2026-02-09 16:51:27.490] INFO [rustwebui_app::handlers] System info handlers registered
+[2026-02-09 16:51:27.491] INFO [rustwebui_app::handlers] Utility handlers registered
+[2026-02-09 16:51:27.491] INFO [rustwebui_app::handlers] Advanced handlers registered
+[2026-02-09 16:51:27.492] INFO [rustwebui_app::handlers] Enhanced handlers registered
+[2026-02-09 16:51:27.492] INFO [rustwebui_app] Window title: Rust WebUI Application
+[2026-02-09 16:51:27.492] INFO [rustwebui_app] Loading application UI from http://localhost:8080
+[2026-02-09 16:51:28.189] INFO [rustwebui_app] HTTP Request: / -> "frontend/dist/index.html"
+[2026-02-09 16:51:28.198] INFO [rustwebui_app] HTTP Request: /static/css/winbox.min.css -> "frontend/dist/static/css/winbox.min.css"
+[2026-02-09 16:51:28.199] INFO [rustwebui_app] HTTP Request: /static/js/winbox.min.js -> "frontend/dist/static/js/winbox.min.js"
+[2026-02-09 16:51:28.200] INFO [rustwebui_app] HTTP Request: /static/js/vendors.7740078c.js -> "frontend/dist/static/js/vendors.7740078c.js"
+[2026-02-09 16:51:28.202] INFO [rustwebui_app] HTTP Request: /static/js/index.47811421.js -> "frontend/dist/static/js/index.47811421.js"
+[2026-02-09 16:51:42.832] INFO [rustwebui_app] Application started successfully, waiting for events...
+[2026-02-09 16:51:42.832] INFO [rustwebui_app] =============================================
+[2026-02-09 16:51:44.974] INFO [rustwebui_app] Application shutting down...
+[2026-02-09 16:51:44.974] INFO [rustwebui_app] =============================================

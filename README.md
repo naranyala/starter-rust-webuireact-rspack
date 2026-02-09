@@ -1,748 +1,190 @@
-# Rust WebUI Application - Complete Architecture Documentation
+# Rust WebUI Application Starter
 
-A **high-performance, feature-rich desktop application** built with **Rust**, **WebUI**, and **React** showcasing **enterprise-grade architecture** with **28+ utility modules**, **enhanced system integration**, and **modern Rust ecosystem** utilization.
+A modern, production-ready desktop application template that combines the raw performance of Rust with the rich ecosystem of React for building cross-platform desktop applications. This starter kit delivers a fully functional foundation for developers who demand both type safety and rapid UI development.
 
-## 📊 Project Overview
+## Why This Stack
 
-- **9,200+ lines of Rust code** across 18 infrastructure modules
-- **2 distinct architectural layers** with clear separation of concerns
-- **3 different utility tiers** (Basic, Advanced, Enhanced) with progressive complexity
-- **60+ system utilities** leveraging modern Rust crates
-- **Cross-platform support** with platform-specific optimizations
-- **Production-ready build system** with CI/CD pipelines
+This project exists because building desktop applications from scratch is unnecessarily difficult. Traditional approaches force developers to choose between performance and productivity, or between native code and web technologies. This starter eliminates that compromise by leveraging WebUI, a framework that renders web content using the operating system's native webview while maintaining direct communication with Rust backend logic.
 
----
+The architecture separates concerns cleanly: Rust handles system integration, data persistence, and business logic, while React manages the user interface through familiar component-based patterns. The two layers communicate through a bridge that transmits typed data and events in both directions, giving you the best of both worlds without sacrificing either performance or developer velocity.
 
-## 🏗️ Architecture Hierarchy
+Developers choose this stack for specific reasons that matter in production environments. Rust's zero-cost abstractions mean your backend code executes with native speed, and its memory safety guarantees eliminate entire categories of bugs that plague desktop applications. React's component model and extensive ecosystem provide everything needed to build complex, responsive interfaces quickly. When you combine these strengths with rspack's blazing-fast bundling, you get a development experience that feels lightweight despite producing fully-featured desktop software.
 
-### **Layer 1: Infrastructure Layer (src/infrastructure/)**
-*Purpose: Low-level system abstraction and cross-platform utilities*
+## Project Architecture
 
-| Module | Lines | Category | Key Crates | Primary Responsibility |
-|--------|-------|----------|------------|---------------------|
-| `enhanced_system.rs` | 783 | System Monitoring | `sysinfo`, `nix`, `tokio` | Real-time system metrics, process trees |
-| `enhanced_fs.rs` | 725 | File System | `notify`, `trash`, `rayon` | Parallel file ops, watchers, archives |
-| `enhanced_network.rs` | 628 | Networking | `reqwest`, `tokio` | Async HTTP, connection pooling |
-| `native_dialogs.rs` | 709 | UI Integration | `rfd`, `open` | Platform-native dialogs |
-| `system_api.rs` | 664 | System Integration | `windows`, `libc` | Low-level system APIs |
-| `registry.rs` | 571 | System Settings | `windows`, `nix` | Registry/config management |
-| `shell_integration.rs` | 469 | Shell Integration | `nix`, `fd-lock` | Shell commands, PATH, aliases |
-| `fs_utils.rs` | 311 | Basic File Ops | `walkdir`, `dirs` | Core filesystem operations |
-| `http_client.rs` | 364 | Basic HTTP | - | Simple HTTP client |
-| `process_manager.rs` | 253 | Process Control | `nix` | External process execution |
-| `database.rs` | 375 | Data Persistence | `rusqlite` | SQLite abstraction layer |
-| `storage.rs` | 323 | Local Storage | `serde`, `toml` | Key-value storage with TTL |
-| `notification.rs` | 207 | User Notifications | - | Cross-platform notifications |
-| `clipboard.rs` | 114 | Clipboard Operations | `arboard`, `base64` | Copy/paste operations |
-| `config.rs` | 264 | Configuration | `serde`, `toml` | App configuration management |
-| `logging.rs` | 100 | Logging | `env_logger` | Structured logging |
-| `di.rs` | 83 | Dependency Injection | - | Service container |
-| `mod.rs` | 20 | Module Exports | - | Public API surface |
+The application follows a deliberate three-layer architecture that scales from simple prototypes to complex production applications. Each layer has a distinct purpose and set of responsibilities, making it easy to extend functionality without contaminating existing code.
 
-### **Layer 2: Business Logic Layer (src/use_cases/)**
-*Purpose: Application business logic and event handling*
+The presentation layer contains all user interface code, written in TypeScript and React. This layer never directly accesses the filesystem, database, or system APIs. Instead, it requests operations through well-defined channels and receives results through event callbacks. This separation means your interface remains responsive even when the backend performs heavy computations, and it means interface changes never risk destabilizing backend logic.
 
-| Module | Lines | Category | Primary Responsibility |
-|--------|-------|----------|---------------------|
-| `handlers/enhanced_handlers.rs` | 576 | Enhanced Utilities | Handlers for modern crate integrations |
-| `handlers/advanced_handlers.rs` | 467 | Advanced Integration | Native dialogs, system APIs, registry |
-| `handlers/utils_handlers.rs` | 514 | Core Utilities | File system, clipboard, notifications, storage |
-| `handlers/db_handlers.rs` | 299 | Data Operations | CRUD operations for SQLite database |
-| `handlers/sysinfo_handlers.rs` | 216 | System Information | Basic system monitoring and reporting |
-| `handlers/ui_handlers.rs` | 56 | User Interface | UI initialization and basic events |
-| `handlers/api_handlers.rs` | 2 | API Gateway | Placeholder for REST API handlers |
-| `mod.rs` | 7 | Module Exports | Handler coordination |
+The application layer coordinates between the presentation and infrastructure layers. It receives requests from the frontend, validates inputs, invokes appropriate services, and formats responses. This layer contains the handlers that WebUI binds to JavaScript events, translating calls like `getUsers()` into database queries and returning structured results. By keeping this coordination logic separate from both the interface and the system abstractions, the codebase remains testable and maintainable.
 
-### **Application Entry Point**
-- `src/main.rs` (117 lines): Application bootstrap, initialization, and coordination
+The infrastructure layer provides low-level capabilities that higher layers consume. SQLite handles data persistence. The configuration system loads settings from TOML files with sensible defaults. The logging system captures runtime information for debugging and auditing. Each infrastructure component exposes a clean API that hides platform-specific details behind a uniform interface, ensuring your application code remains portable across Linux, macOS, and Windows.
 
----
+## Directory Structure
 
-## 📁 Complete Project Structure
+The project root contains everything needed to build, run, and distribute the application. Understanding this structure helps you navigate the codebase confidently and locate the files you need to modify.
 
 ```
-starter-rust-webuireact-rspack/                                   # Project Root (9,217 LOC)
-├── 📄 Core Configuration Files
-│   ├── 📋 Cargo.toml                    # Rust manifest with 25+ modern crates
-│   ├── 📋 Cargo.lock                    # Locked dependency tree (exact versions)
-│   ├── 📋 app.config.toml               # Runtime configuration (TOML)
-│   ├── 📄 build.rs                      # Build script (C compilation, WebUI integration)
-│   ├── 📄 build-frontend.js             # Frontend build automation (Bun + Rsbuild)
-│   ├── 🐚 build-dist.sh                 # Cross-platform distribution builder
-│   ├── 🐚 post-build.sh                 # Executable post-processing
-│   ├── 🐚 run.sh                       # Master build/run controller
-│   └── 📄 README.md                    # This documentation
-│
-├── 📦 Runtime Files (Generated)
-│   ├── 💾 app.db                        # SQLite database (auto-created)
-│   ├── 📋 application.log               # Runtime logs (env_logger)
-│   ├── 🗂️ static/                      # Compiled frontend assets
-│   │   ├── 🎨 css/                     # Optimized CSS bundles
-│   │   └── ⚙️ js/                      # Optimized JavaScript bundles
-│   └── 📦 dist/                        # Distribution packages
-│
-├── 🦀 Rust Backend (src/) - 9,217 LOC
-│   ├── 🏗️ infrastructure/               # Low-level system abstractions (6,963 LOC)
-│   │   ├── 🖥️ enhanced_system.rs       # Real-time system monitoring (783 LOC)
-│   │   ├── 📁 enhanced_fs.rs           # Parallel file operations (725 LOC)
-│   │   ├── 🌐 enhanced_network.rs     # Async HTTP client (628 LOC)
-│   │   ├── 🪟 native_dialogs.rs        # Platform-native dialogs (709 LOC)
-│   │   ├── ⚙️ system_api.rs            # System API integration (664 LOC)
-│   │   ├── 📝 registry.rs               # Registry & settings (571 LOC)
-│   │   ├── 🐚 shell_integration.rs    # Shell command integration (469 LOC)
-│   │   ├── 📋 database.rs               # SQLite abstraction (375 LOC)
-│   │   ├── 📁 fs_utils.rs               # Core filesystem ops (311 LOC)
-│   │   ├── 🌐 http_client.rs           # Basic HTTP client (364 LOC)
-│   │   ├── 💾 storage.rs                # Local key-value storage (323 LOC)
-│   │   ├── 🔧 process_manager.rs       # External process control (253 LOC)
-│   │   ├── 🔔 notification.rs          # Cross-platform notifications (207 LOC)
-│   │   ├── ⚙️ config.rs                 # Configuration management (264 LOC)
-│   │   ├── 📋 clipboard.rs             # Clipboard operations (114 LOC)
-│   │   ├── 📝 logging.rs               # Structured logging (100 LOC)
-│   │   ├── 🔗 di.rs                    # Dependency injection (83 LOC)
-│   │   └── 📦 mod.rs                   # Module exports (20 LOC)
-│   │
-│   ├── 🎯 use_cases/                    # Business logic layer (2,141 LOC)
-│   │   └── 📡 handlers/                 # Event handlers (2,141 LOC)
-│   │       ├── 🚀 enhanced_handlers.rs  # Modern crate handlers (576 LOC)
-│   │       ├── 🔧 advanced_handlers.rs   # FFI integration handlers (467 LOC)
-│   │       ├── 🛠️ utils_handlers.rs     # Core utility handlers (514 LOC)
-│   │       ├── 📋 db_handlers.rs         # Database CRUD handlers (299 LOC)
-│   │       ├── 📊 sysinfo_handlers.rs    # System info handlers (216 LOC)
-│   │       ├── 🎨 ui_handlers.rs        # UI event handlers (56 LOC)
-│   │       ├── 🌐 api_handlers.rs       # API gateway handlers (2 LOC)
-│   │       └── 📦 mod.rs                 # Handler coordination (7 LOC)
-│   │
-│   └── 🚀 main.rs                       # Application entry point (117 LOC)
-│
-├── ⚛️ Frontend Application (frontend/)
-│   ├── 📦 package.json                  # Node.js dependencies (React, Rsbuild)
-│   ├── 🔧 biome.json                    # Code formatting/linting
-│   ├── 📋 tsconfig.json                # TypeScript configuration
-│   ├── 🏗️ rspack.config.ts            # Production build config
-│   ├── 🏗️ rspack.config.dev.ts        # Development build config
-│   ├── 📄 index.html                   # HTML template
-│   │
-│   └── 📁 src/                          # Frontend source code
-│       ├── 🚀 main.tsx                  # React application entry point
-│       ├── 📦 lib/                      # JavaScript utilities
-│       │   ├── 🔗 webui-bridge.js       # Rust-JavaScript bridge
-│       │   ├── 📝 logger.js              # Unified logging
-│       │   ├── 🔗 di.js                 # Dependency injection
-│       │   └── 📦 index.js              # Utility exports
-│       ├── 🎨 components/                # Reusable React components
-│       ├── 📋 types/                    # TypeScript type definitions
-│       └── 🎯 use-cases/               # Feature-specific components
-│           └── 📱 App.tsx               # Root React component
-│
-├── 📚 Examples & References (examples/)
-│   └── 🌐 webui-temp/                  # WebUI reference implementations
-│       ├── 💻 examples/                 # Example programs (5 examples)
-│       ├── 📚 src/                      # Reference source code
-│       └── 📋 README.md                # Example documentation
-│
-└── 🛠️ Third-Party Dependencies (thirdparty/)
-    └── 🌐 webui-c-src/                 # WebUI C library source
-        ├── 🌐 src/                      # Core C implementation
-        ├── 🔧 bridge/                   # JavaScript-C bridge
-        ├── 📚 examples/                 # C/C++ examples (15 examples)
-        └── 📖 include/                  # C header files
+starter-rust-webuireact-rspack/
+├── src/                          # Rust backend source code
+│   ├── main.rs                   # Application entry point
+│   ├── core.rs                   # Core infrastructure (config, logging, database)
+│   └── handlers.rs               # WebUI event handlers
+├── frontend/                     # React frontend application
+│   ├── src/
+│   │   ├── main.tsx              # React application entry point
+│   │   ├── use-cases/
+│   │   │   └── App.tsx           # Main application component
+│   │   └── utils.js              # JavaScript utilities
+│   ├── rspack.config.ts          # Production bundler configuration
+│   ├── rspack.config.dev.ts      # Development bundler configuration
+│   ├── rspack.config.inline.ts   # Inline asset configuration
+│   ├── package.json              # Node.js dependencies
+│   ├── tsconfig.json             # TypeScript configuration
+│   └── biome.json                # Code formatting rules
+├── static/                       # Compiled frontend assets (generated)
+├── dist/                         # Distribution packages (generated)
+├── Cargo.toml                    # Rust package configuration
+├── app.config.toml               # Runtime configuration file
+├── build.rs                      # Build script for native dependencies
+├── build-frontend.js             # Frontend build automation
+├── build-dist.sh                 # Distribution packaging script
+├── run.sh                        # Development workflow script
+└── README.md                     # This documentation
 ```
 
----
-
-## 🏗️ Architectural Patterns
-
-### **1. Hexagonal Architecture**
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Presentation Layer                      │
-│                    (React Frontend)                        │
-└─────────────────────┬───────────────────────────────────────┘
-                      │ Custom Events (JavaScript ↔ Rust)
-┌─────────────────────▼───────────────────────────────────────┐
-│                   Application Layer                         │
-│          (Business Logic + Event Handlers)                 │
-└─────────────────────┬───────────────────────────────────────┘
-                      │ Service Dependencies
-┌─────────────────────▼───────────────────────────────────────┐
-│                 Infrastructure Layer                        │
-│           (System APIs, Database, Utilities)               │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### **2. Dependency Injection Container**
-```rust
-// Global singleton management via OnceLock
-static ENHANCED_FS: OnceLock<EnhancedFileSystemManager> = OnceLock::new();
-static ENHANCED_SYSTEM: OnceLock<EnhancedSystemManager> = OnceLock::new();
-static ENHANCED_NETWORK: OnceLock<EnhancedNetworkManager> = OnceLock::new();
-```
-
-### **3. Event-Driven Communication**
-```rust
-// Rust → JavaScript (Responses)
-window.dispatchEvent(new CustomEvent('response_name', { detail: json_data }));
-
-// JavaScript → Rust (Events)
-webui.call('event_name:param1:param2');
-```
-
----
-
-## 🚀 Utility Tiers & Evolution
-
-### **Tier 1: Basic Utilities**
-*Foundation utilities using standard library*
-
-- **File System**: Basic read/write operations
-- **HTTP Client**: Simple curl-based requests  
-- **Process Manager**: Basic command execution
-- **Configuration**: TOML file parsing
-- **Database**: SQLite CRUD operations
-
-### **Tier 2: Advanced Utilities**
-*Platform-specific FFI integration*
-
-- **Native Dialogs**: System file pickers using `rfd`
-- **System APIs**: Low-level OS integration (`nix`, `windows`)
-- **Registry Management**: Windows registry & Unix equivalents
-- **Shell Integration**: PATH management, aliases, functions
-- **Enhanced Process Control**: Elevated commands, process trees
-
-### **Tier 3: Enhanced Utilities**
-*Modern Rust ecosystem with async/parallel*
-
-- **Enhanced File System**: `notify`, `rayon`, `trash`, `filetime`
-- **Enhanced System Monitoring**: `sysinfo`, `tokio`, real-time metrics
-- **Enhanced Network**: `reqwest`, `tokio`, connection pooling
-- **Performance**: Parallel processing, async I/O, memory management
-
----
-
-## 📦 Modern Rust Crate Integration
-
-### **System Integration**
-```toml
-sysinfo = "0.30"          # Real-time system monitoring
-nix = "0.27"              # Unix/Linux system APIs
-windows = "0.52"          # Windows API bindings
-libc = "0.2"              # C library interfaces
-```
-
-### **Async & Performance**
-```toml
-tokio = { version = "1.0", features = ["full"] }  # Async runtime
-rayon = "1.7"             # Data parallelism
-parking_lot = "0.12"      # High-performance synchronization
-crossbeam = "0.8"         # Concurrent data structures
-```
-
-### **File System & Storage**
-```toml
-notify = "6.0"             # File system events
-trash = "3.0"              # Cross-platform trash deletion
-tempfile = "3.8"          # Temporary file management
-fd-lock = "4.0"            # File locking
-filetime = "0.2"           # File timestamps
-```
-
-### **Network & HTTP**
-```toml
-reqwest = { version = "0.11", features = ["json", "stream"] }  # Modern HTTP
-arboard = "3.3"            # Cross-platform clipboard
-open = "5.0"               # Default application launcher
-```
-
-### **GUI & Dialogs**
-```toml
-rfd = "0.11"               # Native file dialogs
-clipboard = "0.5"          # Fallback clipboard
-image = "0.24"             # Image processing
-```
-
-### **Data & Serialization**
-```toml
-serde = { version = "1.0", features = ["derive"] }   # Serialization
-config = "0.13"            # Configuration management
-ron = "0.8"                # Rust Object Notation
-uuid = { version = "1.6", features = ["v4", "serde"] }  # UUIDs
-```
-
-### **Compression & Archives**
-```toml
-flate2 = "1.0"             # Gzip compression
-tar = "0.4"                # Tar archives
-zip = "0.6"                # Zip archives
-```
-
-### **Security & Encryption**
-```toml
-ring = "0.17"              # Cryptographic operations
-aes-gcm = "0.10"           # AES encryption
-sha2 = "0.10"              # SHA hashing
-```
-
-### **Error Handling & Utilities**
-```toml
-anyhow = "1.0"             # Error context
-thiserror = "1.0"           # Custom error types
-base64 = "0.21"            # Base64 encoding
-num_cpus = "1.0"           # CPU count
-dirs = "5.0"               # System directories
-walkdir = "2.3"            # Directory traversal
-```
-
----
-
-## 🔧 Build System Architecture
-
-### **Multi-Stage Build Pipeline**
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    BUILD PIPELINE                           │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│ 1. FRONTEND COMPILATION                                    │
-│    ┌──────────────────┐                                    │
-│    │  React/TSX      │ ──► Bun ──► Rsbuild ──► frontend/dist │
-│    │  Components      │                                    │
-│    └──────────────────┘                                    │
-│           │                                                 │
-│           ▼                                                 │
-│    ┌──────────────────┐                                    │
-│    │ build-frontend.js│ ──► Static asset flattening         │
-│    └──────────────────┘                                    │
-│                                                             │
-│ 2. BACKEND COMPILATION                                     │
-│    ┌──────────────────┐                                    │
-│    │  Rust Source     │ ──► Cargo ──► target/release/app    │
-│    │  + C Dependencies│                                    │
-│    └──────────────────┘                                    │
-│           │                                                 │
-│           ▼                                                 │
-│    ┌──────────────────┐                                    │
-│    │ build.rs         │ ──► CC crate ──► libwebui-static.a  │
-│    └──────────────────┘                                    │
-│                                                             │
-│ 3. POST-PROCESSING                                         │
-│    ┌──────────────────┐                                    │
-│    │ post-build.sh    │ ──► Executable renaming              │
-│    └──────────────────┘                                    │
-│                                                             │
-│ 4. DISTRIBUTION CREATION                                    │
-│    ┌──────────────────┐                                    │
-│    │ build-dist.sh    │ ──► Platform-specific packages       │
-│    └──────────────────┘                                    │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### **Build Configuration Matrix**
-
-| Platform | Toolchain | Output Format | Dependencies |
-|----------|-----------|---------------|--------------|
-| Linux    | GCC + Cargo | ELF + .tar.gz | libc, libm, webkit2gtk |
-| macOS    | Clang + Cargo | Mach-O + .tar.gz | System frameworks |
-| Windows  | MSVC + Cargo | PE + .zip | MSVC runtime |
-
-### **Development vs Production**
-
-| Stage | Frontend | Backend | Output |
-|-------|----------|---------|--------|
-| Development | HMR enabled, source maps | Debug symbols, fast compilation | `target/debug/app` |
-| Production | Minified, optimized | LTO, codegen-units=1 | `target/release/app` |
-
----
-
-## 🗂️ Data Flow Architecture
-
-### **Bidirectional Communication Pattern**
-```rust
-// Event Handler Registration
-window.bind("event_name", |event| {
-    // 1. Parse incoming data
-    let data: serde_json::Value = serde_json::from_str(&event.data)?;
-    
-    // 2. Process business logic
-    let result = business_logic(data)?;
-    
-    // 3. Send response
-    let response = serde_json::json!({
-        "success": true,
-        "data": result,
-        "operation_id": operation_id
-    });
-    
-    let js = format!(
-        "window.dispatchEvent(new CustomEvent('response_name', {{ detail: {} }}))",
-        response.to_string()
-    );
-    
-    webui::Window::from_id(event.window).run_js(&js);
-});
-```
-
-### **Database Layer Abstraction**
-```rust
-// Thread-safe database wrapper
-pub struct Database {
-    connection: Arc<Mutex<Connection>>,
-}
-
-impl Database {
-    pub fn query(&self, sql: &str, params: &[&dyn ToSql]) -> Result<serde_json::Value> {
-        let conn = self.connection.lock().unwrap();
-        let mut stmt = conn.prepare(sql)?;
-        let rows = stmt.query_map(params, |row| {
-            // Convert SQLite rows to JSON
-        })?;
-        
-        Ok(rows_to_json(rows))
-    }
-}
-```
-
-### **Configuration Management**
-```rust
-// Hierarchical configuration loading
-impl AppConfig {
-    pub fn load() -> Result<Self> {
-        // 1. Default values
-        let mut config = AppConfig::default();
-        
-        // 2. TOML file override
-        if let Ok(toml_str) = fs::read_to_string("app.config.toml") {
-            config = toml::from_str(&toml_str)?;
-        }
-        
-        // 3. Environment variable override (planned)
-        
-        Ok(config)
-    }
-}
-```
-
----
-
-## 🔄 Runtime Lifecycle
-
-### **Application Startup Sequence**
-```rust
-fn main() {
-    // 1. Configuration Loading
-    let config = AppConfig::load()?;
-    
-    // 2. Logging Initialization
-    logging::init_logging_with_config(
-        Some(config.get_log_file()),
-        config.get_log_level(),
-        config.is_append_log(),
-    )?;
-    
-    // 3. Dependency Injection Setup
-    di::init_container();
-    
-    // 4. Database Initialization
-    let db = Database::new(config.get_db_path())?;
-    db.init()?;
-    
-    // 5. WebUI Window Creation
-    let mut window = webui::Window::new();
-    
-    // 6. Handler Registration
-    handlers::utils_handlers::setup_utils_handlers(&mut window);
-    handlers::advanced_handlers::setup_advanced_handlers(&mut window);
-    handlers::enhanced_handlers::setup_enhanced_handlers(&mut window);
-    
-    // 7. Frontend Loading
-    window.show("frontend/dist/index.html");
-    
-    // 8. Event Loop
-    webui::wait();
-}
-```
-
-### **Memory Management Strategy**
-```rust
-// Arc<Mutex<T>> for shared state
-static ENHANCED_SYSTEM: OnceLock<EnhancedSystemManager> = OnceLock::new();
-
-// Thread-safe operations
-let db = Arc::new(Mutex::new(Database::new()?));
-
-// RAII resource management
-struct ResourceHandle {
-    _guard: Option<JoinHandle<()>>,
-}
-
-impl Drop for ResourceHandle {
-    fn drop(&mut self) {
-        // Cleanup resources
-    }
-}
-```
-
----
-
-## 🌐 Cross-Platform Considerations
-
-### **Platform-Specific Optimizations**
-
-| Feature | Linux | macOS | Windows |
-|---------|-------|-------|---------|
-| **File Dialogs** | `zenity`/`kdialog` | `osascript` | `PowerShell` |
-| **Notifications** | `notify-send` | `osascript` | `Toast` |
-| **Process Control** | `nix` + signals | Mach APIs | Windows API |
-| **Clipboard** | X11 selection | NSPasteboard | Windows Clipboard |
-| **System Info** | `/proc/*` | `sysctl` | WMI/Registry |
-| **File Watching** | inotify | FSEvents | ReadDirectoryChanges |
-
-### **Conditional Compilation**
-```rust
-#[cfg(target_os = "linux")]
-fn linux_specific_implementation() { /* ... */ }
-
-#[cfg(target_os = "macos")]
-fn macos_specific_implementation() { /* ... */ }
-
-#[cfg(target_os = "windows")]
-fn windows_specific_implementation() { /* ... */ }
-
-#[cfg(not(target_os = "windows"))]
-fn unix_specific_implementation() { /* ... */ }
-```
-
----
-
-## 📊 Performance Characteristics
-
-### **Benchmarks & Optimizations**
-
-| Operation | Original | Enhanced | Improvement |
-|-----------|----------|----------|-------------|
-| **Directory Scan** | Linear O(n) | Parallel O(n/p) | **3-5x faster** |
-| **HTTP Requests** | Synchronous | Async + Pooling | **10x throughput** |
-| **File Operations** | Single-threaded | Buffered + Parallel | **2-3x faster** |
-| **System Info** | Shell commands | Native APIs | **5-10x faster** |
-| **Database Queries** | Basic SQL | Prepared Statements | **2-3x faster** |
-
-### **Memory Usage**
-- **Resident Set**: ~45MB (with all utilities loaded)
-- **Heap Usage**: ~20MB typical operation
-- **Peak Memory**: ~120MB during large file operations
-- **Memory Safety**: Guaranteed by Rust ownership system
-
----
-
-## 🔒 Security Considerations
-
-### **Input Validation**
-```rust
-// JSON parsing with validation
-let data: serde_json::Value = serde_json::from_str(&params)
-    .map_err(|e| anyhow!("Invalid JSON: {}", e))?;
-
-// Path sanitization
-let safe_path = sanitize_path(&user_input)?;
-
-// SQL injection prevention
-let stmt = conn.prepare("SELECT * FROM users WHERE id = ?")?;
-stmt.query_row(&[user_id], |row| { /* ... */ })?;
-```
-
-### **Resource Management**
-```rust
-// RAII for file handles
-let _file = File::open(path)?; // Auto-closed on drop
-
-// Thread-safe shared resources
-Arc<Mutex<Connection>> // Prevents concurrent access
-
-// Timeout enforcement
-timeout(Duration::from_secs(30), long_running_operation())?;
-```
-
----
-
-## 🧪 Testing Strategy
-
-### **Unit Testing**
-```rust
-#[cfg(test)]
-mod tests {
-    use super::*;
-    
-    #[test]
-    fn test_file_info_extraction() {
-        let temp_file = create_temp_file("test.txt", "content")?;
-        let info = EnhancedFileSystemManager::new()
-            .get_file_info(&temp_file.path())?;
-        
-        assert_eq!(info.name, "test.txt");
-        assert_eq!(info.size, 7);
-        assert!(info.checksum.is_some());
-    }
-}
-```
-
-### **Integration Testing**
-```rust
-#[cfg(test)]
-mod integration_tests {
-    #[tokio::test]
-    async fn test_concurrent_http_requests() {
-        let manager = EnhancedNetworkManager::new()?;
-        let responses = manager.execute_concurrent(test_requests);
-        
-        assert_eq!(responses.len(), test_requests.len());
-        assert!(responses.iter().all(|r| r.success));
-    }
-}
-```
-
----
-
-## 🚀 Deployment & Distribution
-
-### **Self-Contained Packages**
-```
-dist/
-├── app-1.0.0-linux-x64.tar.gz    # 12.5 MB
-├── app-1.0.0-macos-x64.tar.gz    # 11.8 MB
-└── app-1.0.0-windows-x64.zip     # 13.2 MB
-```
-
-**Package Contents:**
-- **Single executable** (`app`/`app.exe`)
-- **Configuration file** (`app.config.toml`)
-- **Static assets** (`static/` directory)
-- **Documentation** (`README.txt`)
-- **Launcher script** (platform-specific)
-
-### **Dependency Strategy**
-- **Static linking** for C/C++ dependencies
-- **Bundled SQLite** (no external database)
-- **Embedded WebUI** (no runtime WebView dependency)
-- **Self-signed certificates** (HTTPS for local files)
-
----
-
-## 🎯 Use Cases & Applications
-
-### **Desktop Applications**
-- **File Managers** with enhanced search and operations
-- **System Monitors** with real-time metrics
-- **IDEs/Editors** with advanced file handling
-- **DevTools** with shell integration
-- **Backup Tools** with archive management
-
-### **Enterprise Tools**
-- **Configuration Managers** with registry integration
-- **Deployment Tools** with elevated operations
-- **Monitoring Dashboards** with system metrics
-- **Security Scanners** with file analysis
-- **Automation Tools** with process control
-
-### **Developer Utilities**
-- **Code Editors** with enhanced file operations
-- **Debugging Tools** with system integration
-- **Performance Analyzers** with real-time monitoring
-- **Testing Frameworks** with automation capabilities
-- **Documentation Generators** with enhanced search
-
----
-
-## 🔮 Future Enhancements
-
-### **Planned Features**
-1. **WebSocket Support** for real-time communication
-2. **Plugin Architecture** with dynamic loading
-3. **Theme System** with CSS integration
-4. **Accessibility Features** with ARIA support
-5. **Internationalization** with i18n support
-
-### **Performance Optimizations**
-1. **Memory Pooling** for frequent allocations
-2. **Cache Systems** for expensive operations
-3. **Lazy Loading** for large datasets
-4. **Background Processing** for heavy tasks
-5. **Streaming Operations** for large files
-
-### **Security Enhancements**
-1. **Code Signing** for distribution
-2. **Sandboxing** for untrusted content
-3. **Permission System** for sensitive operations
-4. **Audit Logging** for security events
-5. **Encryption** for sensitive data
-
----
-
-## 📚 Development Workflow
-
-### **Getting Started**
-```bash
-# 1. Clone repository
-git clone <repository-url>
-cd starter-rust-webuireact-rspack
-
-# 2. Install dependencies
-# Linux: sudo pacman -S rustup base-devel webkit2gtk
-# macOS: xcode-select --install
-# Windows: Install Visual Studio Build Tools
-
-# 3. Install Rust
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-rustup default stable
-
-# 4. Install Bun (frontend)
-curl -fsSL https://bun.sh/install | bash
-
-# 5. Build and run
-./run.sh
-```
-
-### **Development Commands**
-```bash
-./run.sh                # Build and run (development)
-./run.sh --build         # Build only
-./run.sh --release       # Build release version
-./run.sh --clean         # Clean artifacts
-./build-dist.sh         # Create distribution package
-```
-
-### **Code Organization**
-- **Infrastructure Layer**: System abstractions and utilities
-- **Business Logic Layer**: Application-specific logic
-- **Handler Layer**: Event processing and routing
-- **Configuration Layer**: Settings and environment management
-
----
-
-## 📖 References & Resources
-
-### **Key Documentation**
-- [WebUI Framework](https://webui.dev/) - Native web rendering
-- [React Documentation](https://react.dev/) - Frontend framework
-- [Rust Book](https://doc.rust-lang.org/book/) - Language reference
-- [Tokio Tutorial](https://tokio.rs/tokio/tutorial) - Async programming
-
-### **Related Projects**
-- [Tauri](https://tauri.app/) - Alternative Rust web framework
-- [wry](https://github.com/tauri-apps/wry) - Cross-platform webview
-- [egui](https://github.com/emilk/egui) - Immediate mode GUI
-
-### **Community**
-- [Rust Discord](https://discord.gg/rust-lang) - Rust community
-- [WebUI Discord](https://discord.gg/6J3dZ4e) - WebUI framework
-- [Stack Overflow](https://stackoverflow.com/questions/tagged/rust) - Q&A
-
----
-
-## 📄 License
-
-MIT License - See LICENSE file for complete terms and conditions.
-
----
-
-*This documentation represents a **production-ready, enterprise-grade** desktop application architecture leveraging **modern Rust ecosystem** capabilities with **comprehensive cross-platform support** and **advanced system integration**.*
+## Backend Components
+
+The Rust backend consists of three primary files, each serving a distinct role in the application architecture. This minimal surface area makes the codebase approachable while remaining extensible as requirements grow.
+
+### main.rs (189 lines)
+
+This file serves as the application's entry point and orchestration center. It performs all initialization tasks in a deliberate sequence, ensuring that dependencies are available before they are required.
+
+The initialization sequence begins with configuration loading. The application reads `app.config.toml` from several potential locations, allowing users to place configuration files in project roots, dedicated config directories, or specify custom paths through environment variables. If no configuration file exists or parsing fails, the application gracefully falls back to sensible defaults, ensuring the application remains functional even in unexpected states.
+
+After configuration, the logging system initializes with settings from the configuration file. Log messages write to both standard output and a rotating log file, capturing timestamps, severity levels, and structured metadata. This dual output approach supports both live debugging during development and persistent logging in production environments.
+
+The database initialization follows logging setup. The application opens a SQLite database connection, enables WAL mode for improved concurrency, and creates required tables if they do not already exist. When configured to do so, the application populates the database with sample data, providing an immediate demonstration of data persistence capabilities.
+
+The HTTP server for frontend assets starts on a configurable port, serving static files from the compiled frontend directory. This server runs in a separate thread, allowing the main thread to focus on WebUI event handling. The server interprets request paths, determines appropriate file locations, sets correct MIME types, and returns appropriate responses or error codes.
+
+Finally, the application creates the WebUI window, registers all event handlers, loads the frontend URL, and enters the event loop. This loop processes JavaScript calls from the frontend, invokes appropriate handlers, and returns results. The application remains running until all windows close, at which point cleanup routines execute and the process terminates.
+
+### core.rs (284 lines)
+
+This module consolidates infrastructure components that other parts of the application depend upon. Rather than scattering configuration, logging, and database code across multiple files, this consolidation provides a single import point for foundational capabilities.
+
+The `AppConfig` struct defines the application's configuration schema using Serde's derive macros. Four sections cover application metadata, database settings, window configuration, and logging preferences. The struct includes getter methods that provide read-only access to configuration values, preventing accidental modification during runtime. The `load()` method implements a fallback chain that checks multiple paths and environment variables before returning either a parsed configuration or defaults.
+
+The `Logger` struct implements the `log` trait from the `log` crate, providing custom logging behavior that writes to both console and file. Each log entry includes a timestamp with millisecond precision, the log level, the target module, and the message content. The logger checks whether each message should be emitted based on the configured filter level, ensuring that debug messages do not clutter production logs while important events always appear.
+
+The `init_logging_with_config()` function establishes the logger as the global logging implementation. It accepts file path, level, and append mode parameters, parsing the level string into the appropriate filter enum. The function also checks the `RUST_LOG` environment variable, allowing runtime log level adjustment without modifying configuration files.
+
+The `Database` struct wraps a SQLite connection in thread-safe synchronization primitives. The `Arc<Mutex<Connection>>` pattern allows multiple threads to share the same database connection without data races or corruption. The constructor enables WAL mode, which significantly improves performance for concurrent read operations by separating write-ahead logs from the main database file. The `init()` method creates the users table with appropriate constraints, and `insert_sample_data()` populates the table with demonstration records when it is empty.
+
+### handlers.rs (107 lines)
+
+This module contains all WebUI event handler registrations, binding JavaScript function calls to Rust implementations. Each handler group has its own setup function, keeping the registration logic organized and making it easy to add new handlers incrementally.
+
+The module uses a lazy_static singleton to hold the database reference, allowing handlers to access the database without receiving it as a parameter. The `init_database()` function populates this singleton during application startup, after which all handlers can access it through the `DATABASE` static.
+
+Seven handler setup functions exist, each binding one or more event names to closures that process requests. The `setup_ui_handlers()` function registers handlers for counter operations. The `setup_counter_handlers()` function handles counter value retrieval. Database handlers in `setup_db_handlers()` respond to user queries and statistics requests. System information handlers in `setup_sysinfo_handlers()` return hardware and operating system details. Utility handlers in `setup_utils_handlers()` process folder and image operations. Advanced and enhanced handlers provide stubs for additional functionality.
+
+Each handler follows a consistent pattern: receive the event, log the event for debugging purposes, process the request using infrastructure components, and return a result to JavaScript. The logging helps developers trace event flow during development, while the consistent structure makes it straightforward to implement new handlers by following established patterns.
+
+### Cargo.toml
+
+The Cargo manifest declares all Rust dependencies with specific versions that ensure reproducible builds. The package metadata identifies the application, specifies the Rust edition, and configures release profile optimizations.
+
+Key dependencies include webui-rs for the bridge between Rust and web content, rusqlite for SQLite database access with bundled SQLite implementation, tokio for asynchronous runtime capabilities, and tiny_http for serving frontend assets. The serde ecosystem provides configuration parsing and JSON serialization. The chrono crate supplies timestamp generation for logs, and lazy_static enables static variable initialization that depends on runtime configuration.
+
+The release profile configuration enables link-time optimization and single codegen unit compilation, producing the smallest and fastest possible binaries. These optimizations trade compilation time for runtime performance, which is appropriate for production builds but intentionally disabled during development.
+
+## Frontend Components
+
+The frontend application uses React for component-based user interface development, TypeScript for type safety, and rspack for high-performance bundling. This combination delivers excellent developer experience while producing optimized production assets.
+
+### main.tsx (42 lines)
+
+This file serves as the React application's entry point, following the standard pattern established by Create React App and maintained by contemporary tooling. The code demonstrates defensive programming practices that ensure the application provides useful feedback even when unexpected errors occur.
+
+The entry point first logs diagnostic information that helps developers understand the application startup sequence. It then attempts to locate the root DOM element by ID, creating a React root and rendering the application within it. If any step fails, the code catches the exception and displays an error message directly in the document body, preventing the application from failing silently.
+
+Global error handlers capture uncaught exceptions and unhandled promise rejections, logging them to the console for debugging purposes. These handlers ensure that runtime errors provide maximum information for diagnosis, even when they occur in event handlers or asynchronous callbacks.
+
+### use-cases/App.tsx (876 lines)
+
+The main application component implements the complete user interface, including window management, database visualization, and system information display. This file demonstrates how to structure a complex React application using hooks for state management and side effects.
+
+The component maintains several pieces of state using the `useState` hook. The `activeWindows` array tracks open application windows, their minimization status, and references to their WinBox instances. The `dbUsers` array holds database records fetched from the backend. The `dbStats` object contains summary statistics about the database. The `isLoadingUsers` boolean tracks asynchronous operation status.
+
+Window creation uses the WinBox library, a lightweight window management library that provides familiar minimize, maximize, and close controls. The `openWindow()` function creates new windows with configurable titles, content, and icons. Each window registers callbacks for minimize, maximize, restore, and close events, keeping the `activeWindows` state synchronized with the actual window states.
+
+The database viewer displays user records in a table with search and refresh capabilities. When opened, the window triggers JavaScript functions that communicate with the Rust backend, requesting user data and statistics. Responses arrive through custom events that the component listens for, updating state and re-rendering accordingly.
+
+The system information window displays client-side information about the browser, operating system, and hardware. This information comes entirely from browser APIs and does not require backend communication, demonstrating how the frontend can function independently for read-only information display.
+
+The component includes extensive inline styles that provide a dark theme appearance with consistent spacing, colors, and interactions. A responsive design ensures the layout adapts to smaller screens by repositioning the sidebar and adjusting the card grid.
+
+### Configuration Files
+
+The frontend uses three rspack configuration files that control how TypeScript code transforms into optimized JavaScript bundles. The production configuration enables tree shaking, minification, and code splitting. The development configuration preserves source maps and enables hot module replacement for rapid iteration. The inline configuration bundles assets directly into the HTML file for simplified distribution.
+
+The `package.json` file declares dependencies on React and ReactDOM for the user interface, WinBox for window management, and various development dependencies including rspack for bundling, TypeScript for type checking, and Biome for formatting and linting. The scripts section defines convenient commands for building, linting, and formatting the codebase.
+
+The `tsconfig.json` file configures TypeScript compilation, enabling strict type checking, JSX syntax support, and modern ECMAScript targets. The configuration ensures that type errors prevent builds and that the compiled code runs in contemporary browsers.
+
+The `biome.json` file configures Biome, a fast formatter and linter for JavaScript and TypeScript. This configuration ensures consistent code style across the codebase and catches common mistakes before they enter production.
+
+## Build System
+
+The build system combines Rust compilation with frontend bundling, producing a self-contained application that requires no external dependencies beyond the operating system itself.
+
+### Build Pipeline
+
+The `run.sh` script orchestrates the complete build and execution process. It compiles Rust code using Cargo, builds frontend assets using rspack through bun, and launches the resulting application. The script accepts arguments for different build modes, allowing developers to build debug or release versions, run applications without rebuilding, or clean generated artifacts.
+
+The `build-frontend.js` script invokes rspack with appropriate configuration, transforming TypeScript and React code into JavaScript bundles optimized for production. The script handles asset copying, HTML template generation, and cache invalidation automatically.
+
+The `build.rs` script runs during Rust compilation, compiling the WebUI C library into a static archive that links with the application. This script uses the CC crate to invoke the platform C compiler, managing platform-specific compiler flags and include paths.
+
+### Configuration Management
+
+The application supports configuration through TOML files and environment variables. The `app.config.toml` file in the project root configures application name, version, database path, window title, and logging preferences. The configuration system provides sensible defaults, ensuring the application runs correctly even when configuration files are missing or incomplete.
+
+## Communication Between Layers
+
+The frontend and backend communicate through a bridge that transmits JavaScript function calls to Rust handlers and returns results through custom events. This pattern provides type safety through TypeScript interfaces while maintaining the flexibility needed for dynamic communication.
+
+JavaScript code calls Rust functions by invoking `window.functionName()` where the function was bound during handler registration. These calls transmit any arguments as string data that Rust handlers parse as JSON. After processing, Rust handlers construct JavaScript code that dispatches custom events with results in the `detail` field.
+
+The frontend registers event listeners for response events using `window.addEventListener()`. When events fire, handlers extract data from `event.detail`, update component state, and trigger re-renders. This decoupled architecture means the backend never holds references to JavaScript objects, and the frontend never accesses Rust memory directly.
+
+## Extending the Application
+
+This starter kit provides a foundation that you can extend in several directions based on your specific requirements.
+
+To add new backend handlers, create a new function in `handlers.rs` that accepts a WebUI event, processes it using infrastructure components, and returns a result. Register the handler in `main.rs` using `window.bind()` with a unique event name. Add corresponding JavaScript functions in the frontend that call these handlers and handle their responses.
+
+To add new frontend features, create additional React components in appropriate directories and import them into the main application. The existing component structure demonstrates how to manage state, respond to events, and integrate with the backend bridge.
+
+To add new infrastructure capabilities, extend `core.rs` with new structs and functions that provide the required functionality. Dependencies should be added to `Cargo.toml` with appropriate version constraints. The clean separation between infrastructure and application logic ensures that low-level changes do not affect user-facing code.
+
+## Getting Started
+
+Clone the repository and navigate to the project directory. Install Rust through rustup if you have not already, ensuring you have a recent stable toolchain. Install bun for frontend package management using the official installation script.
+
+Run `./run.sh` to build both the Rust backend and React frontend, then launch the application. The first build takes several minutes as it downloads dependencies and compiles both codebases. Subsequent builds are significantly faster as caching takes effect.
+
+During development, you can modify either backend or frontend code and rebuild incrementally. The Rust backend requires recompilation for changes, while the frontend supports hot module replacement in development mode for instant feedback on interface changes.
+
+## Production Deployment
+
+The `build-dist.sh` script creates distribution packages containing the compiled application, configuration file, and static assets. These packages are self-contained and run on any system with the appropriate operating system, requiring no additional installation steps beyond extraction.
+
+The release build configuration enables aggressive optimizations that reduce binary size and improve runtime performance. LTO (link-time optimization) allows the compiler to optimize across crate boundaries, and single codegen unit compilation enables more aggressive inlining decisions.
+
+## License
+
+This project is available under the terms of the MIT License, which permits unrestricted use, modification, and distribution of the software and its derivatives. See the LICENSE file for complete terms.
