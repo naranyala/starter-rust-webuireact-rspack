@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useError } from '../utils/ErrorProvider';
 
 declare global {
   interface Window {
@@ -42,6 +43,7 @@ interface User {
 }
 
 const App: React.FC = () => {
+  const { addError, addErrorFromException, errors } = useError();
   const [activeWindows, setActiveWindows] = useState<WindowInfo[]>([]);
   const [dbUsers, setDbUsers] = useState<User[]>([]);
   const [dbStats, setDbStats] = useState({ users: 0, tables: [] as string[] });
@@ -880,7 +882,63 @@ const App: React.FC = () => {
 
         <div className="main-container">
           <header className="header">
-            <h1>System Dashboard</h1>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h1>System Dashboard</h1>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={() => {
+                    addError('This is a demo error!', 'error', 'Stack trace: ErrorProviderDemo\n    at testButton.onClick\n    at App.render');
+                  }}
+                  style={{
+                    background: 'rgba(255,255,255,0.2)',
+                    color: 'white',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    padding: '6px 12px',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                  }}
+                >
+                  ⚠️ Test Error
+                </button>
+                <button
+                  onClick={() => {
+                    addError('This is a demo warning!', 'warning');
+                  }}
+                  style={{
+                    background: 'rgba(255,255,255,0.2)',
+                    color: 'white',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    padding: '6px 12px',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                  }}
+                >
+                  ⚡ Test Warning
+                </button>
+                <button
+                  onClick={() => {
+                    try {
+                      throw new Error('Exception from demo button! This is a test error with stack trace.');
+                    } catch (e) {
+                      addErrorFromException(e);
+                    }
+                  }}
+                  style={{
+                    background: 'rgba(255,255,255,0.2)',
+                    color: 'white',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    padding: '6px 12px',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                  }}
+                >
+                  💥 Test Exception
+                </button>
+              </div>
+            </div>
           </header>
 
           <main className="main-content">

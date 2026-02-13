@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './use-cases/App';
+import { ErrorProvider, ErrorPanel } from './utils/ErrorProvider';
 
 // Add error handling for debugging
 console.log('=== React Application Starting ===');
@@ -17,7 +18,10 @@ try {
     
     root.render(
       <React.StrictMode>
-        <App />
+        <ErrorProvider>
+          <ErrorPanel />
+          <App />
+        </ErrorProvider>
       </React.StrictMode>
     );
     console.log('React render called');
