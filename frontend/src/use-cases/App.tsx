@@ -210,14 +210,26 @@ const App: React.FC = () => {
 
   const openSQLiteWindow = () => {
     setIsLoadingUsers(true);
-    Logger.info('Opening SQLite window, fetching users from backend...');
+    Logger.info('Opening SQLite window, fetching users from backend via event bus...');
 
+    // Emit event to request users from backend via event bus
+    import('../utils/event-bus').then(({ emit, forwardToBackend, EVENT_TYPES }) => {
+      emit(EVENT_TYPES.CUSTOM, {
+        event: 'get_users',
+        source: 'frontend',
+        reason: 'window_open'
+      }, { source: 'frontend_app' });
+      
+      // Also forward to backend directly if available
+      forwardToBackend('get_users', { request: 'users_list' });
+    });
+
+    // Also try traditional method if available
     if (window.getUsers) {
       Logger.info('Calling Rust backend get_users function');
       window.getUsers();
     } else {
       Logger.warn('Rust backend get_users not available');
-      setIsLoadingUsers(false);
     }
 
     if (window.getDbStats) {
@@ -367,11 +379,49 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    Logger.info('Application initialized');
+    Logger.info('Application initialized with event bus integration');
+
+    // Import event bus functions
+    import('../utils/event-bus').then(({ subscribe, emit, forwardToBackend, EVENT_TYPES }) => {
+      // Subscribe to database events from backend
+      const dbUsersSubscription = subscribe(EVENT_TYPES.USERS_FETCHED, (event) => {
+        Logger.info('Received users from backend via event bus', event);
+        if (event.data && Array.isArray(event.data.users)) {
+          setDbUsers(event.data.users);
+          setIsLoadingUsers(false);
+          updateSQLiteTable();
+        }
+      });
+      
+      // Subscribe to database stats events from backend
+      const dbStatsSubscription = subscribe(EVENT_TYPES.CUSTOM, (event) => {
+        if (event.data && event.data.event === 'database.stats_received') {
+          Logger.info('Received database stats from backend', event);
+          setDbStats(event.data.stats || { users: 0, tables: [] });
+        }
+      });
+      
+      // Cleanup subscriptions on unmount
+      return () => {
+        if (typeof dbUsersSubscription === 'function') dbUsersSubscription();
+        if (typeof dbStatsSubscription === 'function') dbStatsSubscription();
+      };
+    });
 
     window.refreshUsers = () => {
-      Logger.info('Refreshing users from database');
+      Logger.info('Refreshing users from database via event bus');
       setIsLoadingUsers(true);
+      
+      // Emit event to request users from backend via event bus
+      import('../utils/event-bus').then(({ emit, EVENT_TYPES }) => {
+        emit(EVENT_TYPES.CUSTOM, {
+          event: 'get_users',
+          source: 'frontend',
+          reason: 'refresh'
+        }, { source: 'frontend_app' });
+      });
+      
+      // Also try traditional method if available
       if (window.getUsers) {
         window.getUsers();
       }

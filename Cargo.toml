@@ -7,12 +7,15 @@ edition = "2024"
 webui-rs = { git = "https://github.com/webui-dev/rust-webui", branch = "main" }
 log = "0.4"
 env_logger = "0.11"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["json", "env-filter"] }
 serde_json = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
 rusqlite = { version = "0.32", features = ["bundled"] }
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"
 lazy_static = "1.4"
+uuid = { version = "1.0", features = ["v4"] }
 
 # Core utilities
 tokio = { version = "1.0", features = ["full"] }

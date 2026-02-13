@@ -1,12 +1,15 @@
-use log::info;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
+use tracing::{info, error, warn};
 use webui_rs::webui;
+use tokio::runtime::{Runtime, Builder};
 
-// Import consolidated modules
+// Declare modules at the crate level so they can be accessed from other modules
+mod build_logger;
+mod event_bus;
 mod core;
-use core::{init_logging_with_config, AppConfig, Database};
+use core::{init_logging_with_config, AppConfig, Database, emit_webui_connected, emit_webui_ready};
 
 mod handlers;
 use handlers::*;
@@ -78,111 +81,138 @@ fn start_http_server(port: u16) -> Result<(), Box<dyn std::error::Error + Send +
 }
 
 fn main() {
-    // Load application configuration
-    let config = match AppConfig::load() {
-        Ok(config) => {
-            println!("Configuration loaded successfully!");
-            println!(
-                "Application: {} v{}",
-                config.get_app_name(),
-                config.get_version()
-            );
-            config
-        }
-        Err(e) => {
-            eprintln!("Failed to load configuration: {}", e);
-            eprintln!("Using default configuration");
-            AppConfig::default()
-        }
-    };
-
-    // Initialize logging system with config settings
-    if let Err(e) = init_logging_with_config(
-        Some(config.get_log_file()),
-        config.get_log_level(),
-        config.is_append_log(),
-    ) {
-        eprintln!("Failed to initialize logger: {}", e);
-        return;
-    }
-
-    info!("=============================================");
-    info!(
-        "Starting: {} v{}",
-        config.get_app_name(),
-        config.get_version()
-    );
-    info!("=============================================");
-
-    info!("Application starting...");
-
-    // Get database path from config
-    let db_path = config.get_db_path();
-    info!("Database path: {}", db_path);
-
-    // Initialize SQLite database
-    let db = match Database::new(db_path) {
-        Ok(db) => {
-            info!("Database initialized successfully");
-            if let Err(e) = db.init() {
-                eprintln!("Failed to initialize database schema: {}", e);
-                return;
+    // Initialize Tokio runtime for async operations
+    let rt = Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .expect("Failed to create Tokio runtime");
+    
+    rt.block_on(async {
+        // Load application configuration
+        let config = match AppConfig::load() {
+            Ok(config) => {
+                println!("Configuration loaded successfully!");
+                println!(
+                    "Application: {} v{}",
+                    config.get_app_name(),
+                    config.get_version()
+                );
+                config
             }
-            if config.should_create_sample_data() {
-                if let Err(e) = db.insert_sample_data() {
-                    eprintln!("Failed to insert sample data: {}", e);
-                    return;
-                }
-                info!("Sample data created (if not exists)");
+            Err(e) => {
+                eprintln!("Failed to load configuration: {}", e);
+                eprintln!("Using default configuration");
+                AppConfig::default()
             }
-            Arc::new(db)
-        }
-        Err(e) => {
-            eprintln!("Failed to initialize database: {}", e);
+        };
+
+        // Initialize logging system with config settings
+        if let Err(e) = init_logging_with_config(
+            Some(config.get_log_file()),
+            config.get_log_level(),
+            config.is_append_log(),
+        ) {
+            eprintln!("Failed to initialize logger: {}", e);
             return;
         }
-    };
 
-    // Initialize database handlers with the database instance
-    init_database(Arc::clone(&db));
+        info!("=============================================");
+        info!(
+            "Starting: {} v{}",
+            config.get_app_name(),
+            config.get_version()
+        );
+        info!("=============================================");
 
-    // Start HTTP server for frontend files
-    let http_port = 8080u16;
-    if let Err(e) = start_http_server(http_port) {
-        eprintln!("Failed to start HTTP server: {}", e);
-        return;
-    }
+        info!("Application starting...");
 
-    // Give the server a moment to start
-    thread::sleep(Duration::from_millis(100));
+        // Get database path from config
+        let db_path = config.get_db_path();
+        info!("Database path: {}", db_path);
 
-    // Create a new window
-    let mut my_window = webui::Window::new();
+        // Initialize SQLite database
+        let db = match Database::new(db_path) {
+            Ok(db) => {
+                info!("Database initialized successfully");
+                if let Err(e) = db.init() {
+                    eprintln!("Failed to initialize database schema: {}", e);
+                    return;
+                }
+                if config.should_create_sample_data() {
+                    if let Err(e) = db.insert_sample_data() {
+                        eprintln!("Failed to insert sample data: {}", e);
+                        return;
+                    }
+                    info!("Sample data created (if not exists)");
+                }
+                Arc::new(db)
+            }
+            Err(e) => {
+                eprintln!("Failed to initialize database: {}", e);
+                return;
+            }
+        };
 
-    // Set up UI event handlers
-    setup_ui_handlers(&mut my_window);
-    setup_counter_handlers(&mut my_window);
-    setup_db_handlers(&mut my_window);
-    setup_sysinfo_handlers(&mut my_window);
-    setup_utils_handlers(&mut my_window);
-    setup_advanced_handlers(&mut my_window);
-    setup_enhanced_handlers(&mut my_window);
+        // Initialize database handlers with the database instance
+        init_database(Arc::clone(&db));
 
-    // Get window settings from config
-    let window_title = config.get_window_title();
-    info!("Window title: {}", window_title);
+        // Start HTTP server for frontend files
+        let http_port = 8080u16;
+        if let Err(e) = start_http_server(http_port) {
+            eprintln!("Failed to start HTTP server: {}", e);
+            return;
+        }
 
-    // Show the built React.js application via HTTP server
-    let url = format!("http://localhost:{}", http_port);
-    info!("Loading application UI from {}", url);
-    my_window.show(&url);
+        // Give the server a moment to start
+        thread::sleep(Duration::from_millis(100));
 
-    info!("Application started successfully, waiting for events...");
-    info!("=============================================");
+        // Create a new window
+        let mut my_window = webui::Window::new();
 
-    // Wait until all windows are closed
-    webui::wait();
+        // Set up UI event handlers
+        setup_ui_handlers(&mut my_window);
+        setup_counter_handlers(&mut my_window);
+        setup_db_handlers(&mut my_window);
+        setup_sysinfo_handlers(&mut my_window);
+        setup_utils_handlers(&mut my_window);
+        setup_advanced_handlers(&mut my_window);
+        setup_enhanced_handlers(&mut my_window);
 
-    info!("Application shutting down...");
-    info!("=============================================");
+        // Initialize WebUI event bridge for bidirectional communication
+        let window_arc = Arc::new(Mutex::new(my_window));
+        init_webui_event_bridge(Arc::clone(&window_arc));
+
+        // Emit WebUI connected event
+        if let Err(e) = emit_webui_connected("main").await {
+            error!("Failed to emit WebUI connected event: {}", e);
+        }
+
+        // Get window settings from config
+        let window_title = config.get_window_title();
+        info!("Window title: {}", window_title);
+
+        // Show the built React.js application via HTTP server
+        let url = format!("http://localhost:{}", http_port);
+        info!("Loading application UI from {}", url);
+        
+        // Lock the window to show it
+        {
+            let mut window_lock = window_arc.lock().unwrap();
+            window_lock.show(&url);
+        }
+
+        info!("Application started successfully, waiting for events...");
+        info!("=============================================");
+
+        // Emit WebUI ready event
+        if let Err(e) = emit_webui_ready("main").await {
+            error!("Failed to emit WebUI ready event: {}", e);
+        }
+
+        // Wait until all windows are closed
+        webui::wait();
+
+        info!("Application shutting down...");
+        info!("=============================================");
+    });
 }

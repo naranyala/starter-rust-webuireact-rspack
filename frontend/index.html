@@ -34,13 +34,13 @@
 </head>
 <body>
   <div id="app"></div>
+  <!-- WebUI JavaScript Bridge -->
+  <script src="/webui.js"></script>
   <script src="./static/js/winbox.min.js"></script>
   <script>
     // Debug script to check if JS is running
     console.log('=== HTML PAGE LOADED ===');
-    document.getElementById('debug-info').innerHTML = 
-      '<p>Page loaded at: ' + new Date().toLocaleTimeString() + '</p>' +
-      '<p>Window location: ' + window.location.href + '</p>';
+    // Removed reference to non-existent debug-info element
   </script>
 </body>
 </html>

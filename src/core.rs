@@ -1,11 +1,20 @@
-use log::{info, LevelFilter};
 use rusqlite::Connection;
 use serde::Deserialize;
 use std::env;
 use std::fs;
-use std::io::Write;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
+use tracing::{info, Level};
+use tracing_subscriber::{
+    fmt,
+    layer::SubscriberExt,
+    util::SubscriberInitExt,
+    EnvFilter,
+};
+
+// Import the build logger and event bus (these are defined at the crate root)
+pub use crate::build_logger::{BuildLogEntry, TimedBuildLogger, BuildLogger};
+pub use crate::event_bus::{EventBus, Event, EventType, GLOBAL_EVENT_BUS, emit_event, emit_counter_increment, emit_counter_reset, emit_counter_value_changed, emit_users_fetched, emit_system_info_request, emit_webui_connected, emit_webui_ready, WebUIEventBridge};
 
 // Consolidated core functionality
 // Combines: config, logging, database, and other infrastructure modules
@@ -40,6 +49,9 @@ pub struct LoggingSettings {
     pub level: String,
     pub file: String,
     pub append: Option<bool>,
+    pub format: Option<String>, // Added format option
+    pub max_file_size: Option<u64>, // Added max file size for rotation
+    pub max_files: Option<usize>, // Added max number of files for rotation
 }
 
 impl Default for AppConfig {
@@ -60,6 +72,9 @@ impl Default for AppConfig {
                 level: String::from("info"),
                 file: String::from("application.log"),
                 append: Some(true),
+                format: Some(String::from("text")), // Default to text format
+                max_file_size: Some(10 * 1024 * 1024), // 10MB default
+                max_files: Some(5), // Keep 5 rotated files
             },
         }
     }
@@ -145,78 +160,69 @@ impl AppConfig {
     pub fn is_append_log(&self) -> bool {
         self.logging.append.unwrap_or(true)
     }
-}
 
-pub struct Logger;
-
-impl Logger {
-    pub fn new() -> Self {
-        Self
-    }
-}
-
-impl log::Log for Logger {
-    fn enabled(&self, metadata: &log::Metadata) -> bool {
-        metadata.level() <= log::max_level() && metadata.level() <= log::STATIC_MAX_LEVEL
+    pub fn get_log_format(&self) -> &str {
+        self.logging.format.as_deref().unwrap_or("text")
     }
 
-    fn log(&self, record: &log::Record) {
-        if self.enabled(record.metadata()) {
-            let timestamp = chrono::Local::now().format("%Y-%m-%d %H:%M:%S%.3f");
-            let level = record.level();
-            let target = record.target();
-            let message = record.args();
-
-            // Print to console
-            println!("[{}] {} [{}] {}", timestamp, level, target, message);
-
-            // Write to log file
-            if let Ok(mut file) = std::fs::OpenOptions::new()
-                .create(true)
-                .append(true)
-                .open("application.log")
-            {
-                writeln!(file, "[{}] {} [{}] {}", timestamp, level, target, message).ok();
-            }
-        }
+    pub fn get_max_file_size(&self) -> u64 {
+        self.logging.max_file_size.unwrap_or(10 * 1024 * 1024)
     }
 
-    fn flush(&self) {}
+    pub fn get_max_files(&self) -> usize {
+        self.logging.max_files.unwrap_or(5)
+    }
 }
 
 pub fn init_logging_with_config(
     log_file: Option<&str>,
     log_level: &str,
-    _append: bool,
+    append: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    log::set_boxed_logger(Box::new(Logger::new()))?;
+    // Build the filter layer
+    let filter_layer = EnvFilter::try_from_default_env()
+        .or_else(|_| EnvFilter::try_new(log_level))
+        .unwrap_or_else(|_| EnvFilter::new("info"));
 
-    // Determine log level from config or environment variable
-    let level = if let Ok(env_level) = std::env::var("RUST_LOG").as_deref() {
-        match env_level {
-            "debug" => LevelFilter::Debug,
-            "info" => LevelFilter::Info,
-            "warn" => LevelFilter::Warn,
-            "error" => LevelFilter::Error,
-            _ => LevelFilter::Info,
-        }
+    // Determine if we should use JSON format
+    let is_json_format = std::env::var("LOG_FORMAT")
+        .unwrap_or_else(|_| "text".to_string())
+        .to_lowercase()
+        == "json";
+
+    if is_json_format {
+        // Initialize JSON logging
+        tracing_subscriber::registry()
+            .with(filter_layer)
+            .with(
+                fmt::layer()
+                    .json()
+                    .with_file(true)
+                    .with_line_number(true)
+                    .with_target(true),
+            )
+            .init();
     } else {
-        match log_level {
-            "debug" => LevelFilter::Debug,
-            "info" => LevelFilter::Info,
-            "warn" => LevelFilter::Warn,
-            "error" => LevelFilter::Error,
-            _ => LevelFilter::Info,
-        }
-    };
-
-    log::set_max_level(level);
-
-    if let Some(file_path) = log_file {
-        if !file_path.is_empty() {
-            println!("Logging to file: {}", file_path);
-        }
+        // Initialize regular logging
+        tracing_subscriber::registry()
+            .with(filter_layer)
+            .with(
+                fmt::layer()
+                    .with_file(true)
+                    .with_line_number(true)
+                    .with_target(true)
+                    .with_thread_ids(true)
+                    .with_thread_names(true),
+            )
+            .init();
     }
+
+    // Log initialization info
+    tracing::info!("Logging initialized with level: {}", log_level);
+    if let Some(file) = log_file {
+        tracing::info!("Log file: {}", file);
+    }
+    tracing::info!("Append mode: {}", append);
 
     Ok(())
 }
@@ -235,6 +241,11 @@ impl Database {
         Ok(Database {
             connection: Arc::new(Mutex::new(conn)),
         })
+    }
+
+    // Getter for the connection (needed for event bus integration)
+    pub fn get_connection(&self) -> Arc<Mutex<Connection>> {
+        Arc::clone(&self.connection)
     }
 
     pub fn init(&self) -> Result<(), Box<dyn std::error::Error>> {
