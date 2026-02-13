@@ -2,7 +2,8 @@ use lazy_static::lazy_static;
 use tracing::{info, error, debug};
 use std::sync::{Arc, Mutex};
 use webui_rs::webui;
-use crate::core::{emit_event, emit_counter_increment, emit_counter_reset, emit_users_fetched, Event, EventType, GLOBAL_EVENT_BUS, WebUIEventBridge};
+use crate::core::{emit_event, emit_counter_increment, emit_counter_reset, emit_users_fetched, Event, EventType, GLOBAL_EVENT_BUS};
+use crate::event_bus::WebUIEventBridge;
 use serde_json::json;
 
 // Consolidated handlers module combining all previous handler modules

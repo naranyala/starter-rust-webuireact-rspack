@@ -2,79 +2,120 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex, RwLock};
 use std::future::Future;
 use std::pin::Pin;
+use std::time::Duration;
 use tokio::sync::broadcast;
 use serde::{Serialize, Deserialize};
 use tracing::{info, error, debug, warn};
 use anyhow::Result;
-use std::time::Instant;
+use chrono::Utc;
+use uuid::Uuid;
+use lazy_static::lazy_static;
 
-// Event types for the application
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum EventPriority {
+    Low,
+    Normal,
+    High,
+    Critical,
+}
+
+impl Default for EventPriority {
+    fn default() -> Self {
+        EventPriority::Normal
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct EventFilter {
+    pub source: Option<String>,
+    pub priority: Option<EventPriority>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum EventType {
-    // UI Events
     CounterIncrement,
     CounterReset,
     CounterValueChanged { value: i32 },
-    
-    // Database Events
     DatabaseConnected,
     DatabaseDisconnected,
     UsersFetched { count: usize, users: Vec<serde_json::Value> },
     UserAdded { id: i32, name: String },
     UserUpdated { id: i32, name: String },
     UserDeleted { id: i32 },
-    
-    // System Events
     SystemInfoRequested,
     SystemInfoReceived { cpu: String, memory: String, os: String },
-    
-    // WebUI Events
     WebUIConnected,
     WebUIReady,
     WebUIDisconnected,
-    
-    // Custom events with generic payload
+    BuildStarted { build_id: String },
+    BuildProgress { build_id: String, step: String, progress: f32 },
+    BuildCompleted { build_id: String, success: bool, duration_ms: u64 },
     Custom { name: String, payload: serde_json::Value },
 }
 
-// Event structure
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Event {
     pub id: String,
+    pub name: String,
     pub event_type: EventType,
-    pub timestamp: u64,
+    pub timestamp: i64,
     pub source: String,
-    pub target: Option<String>, // Specific target, if any
-    pub metadata: HashMap<String, serde_json::Value>, // Additional metadata
+    pub target: Option<String>,
+    pub priority: EventPriority,
+    pub metadata: HashMap<String, serde_json::Value>,
+    pub correlation_id: Option<String>,
+    pub reply_to: Option<String>,
 }
 
 impl Event {
     pub fn new(event_type: EventType, source: &str) -> Self {
+        let name = Self::get_event_name(&event_type);
         Event {
-            id: uuid::Uuid::new_v4().to_string(),
+            id: Uuid::new_v4().to_string(),
+            name,
             event_type,
-            timestamp: std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .unwrap()
-                .as_millis() as u64,
+            timestamp: Utc::now().timestamp_millis(),
             source: source.to_string(),
             target: None,
+            priority: EventPriority::Normal,
             metadata: HashMap::new(),
+            correlation_id: None,
+            reply_to: None,
         }
     }
-    
+
+    pub fn with_name(mut self, name: &str) -> Self {
+        self.name = name.to_string();
+        self
+    }
+
     pub fn with_target(mut self, target: &str) -> Self {
         self.target = Some(target.to_string());
         self
     }
-    
+
+    pub fn with_priority(mut self, priority: EventPriority) -> Self {
+        self.priority = priority;
+        self
+    }
+
     pub fn with_metadata(mut self, key: String, value: serde_json::Value) -> Self {
         self.metadata.insert(key, value);
         self
     }
-    
-    pub fn get_event_name(&self) -> String {
-        match &self.event_type {
+
+    pub fn with_correlation_id(mut self, correlation_id: &str) -> Self {
+        self.correlation_id = Some(correlation_id.to_string());
+        self
+    }
+
+    pub fn with_reply_to(mut self, reply_to: &str) -> Self {
+        self.reply_to = Some(reply_to.to_string());
+        self
+    }
+
+    fn get_event_name(event_type: &EventType) -> String {
+        match event_type {
             EventType::CounterIncrement => "counter.increment".to_string(),
             EventType::CounterReset => "counter.reset".to_string(),
             EventType::CounterValueChanged { .. } => "counter.value_changed".to_string(),
@@ -89,27 +130,34 @@ impl Event {
             EventType::WebUIConnected => "webui.connected".to_string(),
             EventType::WebUIReady => "webui.ready".to_string(),
             EventType::WebUIDisconnected => "webui.disconnected".to_string(),
+            EventType::BuildStarted { .. } => "build.started".to_string(),
+            EventType::BuildProgress { .. } => "build.progress".to_string(),
+            EventType::BuildCompleted { .. } => "build.completed".to_string(),
             EventType::Custom { name, .. } => name.clone(),
         }
     }
 }
 
-// Event listener trait
+pub struct Subscription {
+    pub id: String,
+    pub pattern: String,
+    pub priority: i32,
+}
+
 pub trait EventListener: Send + Sync {
     fn handle_event(&self, event: &Event) -> Pin<Box<dyn Future<Output = Result<()>> + Send + '_>>;
 }
 
-// Concrete implementation of event listener
 pub struct EventHandler<F>
 where
-    F: Fn(&Event) -> Pin<Box<dyn Future<Output = Result<()>> + Send>> + Send + Sync + 'static,
+    F: Fn(Event) -> Pin<Box<dyn Future<Output = Result<()>> + Send>> + Send + Sync + 'static,
 {
     handler: F,
 }
 
 impl<F> EventHandler<F>
 where
-    F: Fn(&Event) -> Pin<Box<dyn Future<Output = Result<()>> + Send>> + Send + Sync + 'static,
+    F: Fn(Event) -> Pin<Box<dyn Future<Output = Result<()>> + Send>> + Send + Sync + 'static,
 {
     pub fn new(handler: F) -> Self {
         EventHandler { handler }
@@ -118,16 +166,16 @@ where
 
 impl<F> EventListener for EventHandler<F>
 where
-    F: Fn(&Event) -> Pin<Box<dyn Future<Output = Result<()>> + Send>> + Send + Sync + 'static,
+    F: Fn(Event) -> Pin<Box<dyn Future<Output = Result<()>> + Send>> + Send + Sync + 'static,
 {
     fn handle_event(&self, event: &Event) -> Pin<Box<dyn Future<Output = Result<()>> + Send>> {
-        (self.handler)(event)
+        (self.handler)(event.clone())
     }
 }
 
-// Event bus implementation
+#[derive(Clone)]
 pub struct EventBus {
-    listeners: Arc<RwLock<HashMap<String, Vec<Arc<dyn EventListener>>>>>,
+    subscriptions: Arc<RwLock<HashMap<String, Vec<(String, Arc<dyn EventListener>)>>>>,
     broadcast_tx: broadcast::Sender<Event>,
     event_history: Arc<Mutex<Vec<Event>>>,
     max_history_size: usize,
@@ -135,48 +183,37 @@ pub struct EventBus {
 
 impl EventBus {
     pub fn new() -> Self {
-        let (broadcast_tx, _) = broadcast::channel(100);
+        let (broadcast_tx, _) = broadcast::channel(256);
         EventBus {
-            listeners: Arc::new(RwLock::new(HashMap::new())),
+            subscriptions: Arc::new(RwLock::new(HashMap::new())),
             broadcast_tx,
             event_history: Arc::new(Mutex::new(Vec::new())),
-            max_history_size: 100,
+            max_history_size: 1000,
         }
     }
 
-    pub fn new_with_history_size(max_history_size: usize) -> Self {
-        let (broadcast_tx, _) = broadcast::channel(100);
-        EventBus {
-            listeners: Arc::new(RwLock::new(HashMap::new())),
-            broadcast_tx,
-            event_history: Arc::new(Mutex::new(Vec::new())),
-            max_history_size,
-        }
+    pub fn subscribe(&self, pattern: &str, listener: Arc<dyn EventListener>) -> String {
+        let id = Uuid::new_v4().to_string();
+        let mut subs = self.subscriptions.write().unwrap();
+        subs.entry(pattern.to_string()).or_insert_with(Vec::new).push((id.clone(), listener));
+        debug!("Subscribed to pattern: {}", pattern);
+        id
     }
 
-    pub fn subscribe(&self, event_type: &str, listener: Arc<dyn EventListener>) {
-        let mut listeners = self.listeners.write().unwrap();
-        listeners.entry(event_type.to_string()).or_insert_with(Vec::new).push(listener);
-        drop(listeners);
-        info!("Subscribed listener to event type: {}", event_type);
-    }
-
-    pub fn unsubscribe(&self, event_type: &str, listener_id: &str) {
-        let mut listeners = self.listeners.write().unwrap();
-        if let Some(subscribers) = listeners.get_mut(event_type) {
-            subscribers.retain(|_| true); // In a real implementation, we'd match by ID
+    pub fn unsubscribe(&self, subscription_id: &str) -> bool {
+        let mut subs = self.subscriptions.write().unwrap();
+        for (_, subscriptions) in subs.iter_mut() {
+            if let Some(pos) = subscriptions.iter().position(|(id, _)| id == subscription_id) {
+                subscriptions.remove(pos);
+                return true;
+            }
         }
-        drop(listeners);
-        info!("Unsubscribed listener from event type: {}", event_type);
+        false
     }
 
     pub async fn emit(&self, event: Event) -> Result<()> {
-        let start_time = Instant::now();
-        let event_name = event.get_event_name();
-        
-        debug!("Emitting event: {} from {}", event_name, event.source);
-        
-        // Add to history
+        debug!("Emitting event: {} from {}", event.name, event.source);
+
         {
             let mut history = self.event_history.lock().unwrap();
             history.push(event.clone());
@@ -184,118 +221,137 @@ impl EventBus {
                 history.remove(0);
             }
         }
-        
-        // Send to broadcast channel (for external consumers like WebUI)
+
         let _ = self.broadcast_tx.send(event.clone());
+
+        let matching_subs = self.get_matching_subscriptions(&event.name);
         
-        // Send to registered listeners
-        let subscribers_to_call = {
-            let listeners = self.listeners.read().unwrap();
-            listeners.get(&event_name)
-                .map(|subscribers| subscribers.clone())
-                .unwrap_or_default()
-        };
-        
-        for subscriber in subscribers_to_call {
-            if let Err(e) = subscriber.handle_event(&event).await {
-                error!("Error handling event by subscriber: {}", e);
+        for (_, listener) in matching_subs {
+            let event_clone = event.clone();
+            tokio::spawn(async move {
+                if let Err(e) = listener.handle_event(&event_clone).await {
+                    error!("Error handling event: {}", e);
+                }
+            });
+        }
+
+        Ok(())
+    }
+
+    fn get_matching_subscriptions(&self, event_name: &str) -> Vec<(String, Arc<dyn EventListener>)> {
+        let subs = self.subscriptions.read().unwrap();
+        let mut matches = Vec::new();
+
+        for (pattern, listeners) in subs.iter() {
+            if self.match_pattern(pattern, event_name) {
+                matches.extend(listeners.iter().cloned());
             }
         }
-        
-        let duration = start_time.elapsed();
-        debug!("Event {} processed in {:?}", event_name, duration);
-        
-        Ok(())
+
+        matches
+    }
+
+    fn match_pattern(&self, pattern: &str, event_name: &str) -> bool {
+        if pattern == event_name || pattern == "*" {
+            return true;
+        }
+
+        let pattern_parts: Vec<&str> = pattern.split('.').collect();
+        let name_parts: Vec<&str> = event_name.split('.').collect();
+
+        if pattern_parts.len() > name_parts.len() {
+            return false;
+        }
+
+        for (i, part) in pattern_parts.iter().enumerate() {
+            if *part == "*" || *part == "**" {
+                return true;
+            }
+            if i >= name_parts.len() || part != &name_parts[i] {
+                return false;
+            }
+        }
+
+        pattern_parts.len() == name_parts.len() || pattern_parts.last() == Some(&"**")
     }
 
     pub fn get_receiver(&self) -> broadcast::Receiver<Event> {
         self.broadcast_tx.subscribe()
     }
 
-    pub fn get_event_history(&self) -> Vec<Event> {
-        self.event_history.lock().unwrap().clone()
+    pub fn get_event_history(&self, limit: Option<usize>) -> Vec<Event> {
+        let history = self.event_history.lock().unwrap();
+        match limit {
+            Some(l) => history.iter().rev().take(l).cloned().collect(),
+            None => history.clone(),
+        }
     }
 
-    pub fn get_events_by_type(&self, event_type: &str) -> Vec<Event> {
-        self.event_history
-            .lock()
-            .unwrap()
-            .iter()
-            .filter(|event| event.get_event_name() == event_type)
-            .cloned()
-            .collect()
-    }
-
-    // Helper methods for common events
     pub async fn emit_counter_increment(&self, source: &str) -> Result<()> {
-        let event = Event::new(EventType::CounterIncrement, source);
-        self.emit(event).await
+        self.emit(Event::new(EventType::CounterIncrement, source)).await
     }
 
     pub async fn emit_counter_reset(&self, source: &str) -> Result<()> {
-        let event = Event::new(EventType::CounterReset, source);
-        self.emit(event).await
+        self.emit(Event::new(EventType::CounterReset, source)).await
     }
 
     pub async fn emit_counter_value_changed(&self, value: i32, source: &str) -> Result<()> {
-        let event = Event::new(EventType::CounterValueChanged { value }, source);
-        self.emit(event).await
+        self.emit(Event::new(EventType::CounterValueChanged { value }, source)).await
     }
 
     pub async fn emit_users_fetched(&self, count: usize, users: Vec<serde_json::Value>, source: &str) -> Result<()> {
-        let event = Event::new(EventType::UsersFetched { count, users }, source);
-        self.emit(event).await
+        self.emit(Event::new(EventType::UsersFetched { count, users }, source)).await
     }
 
     pub async fn emit_system_info_request(&self, source: &str) -> Result<()> {
-        let event = Event::new(EventType::SystemInfoRequested, source);
-        self.emit(event).await
+        self.emit(Event::new(EventType::SystemInfoRequested, source)).await
     }
 
-    pub async fn emit_webui_connected(&self, source: &str) -> Result<()> {
-        let event = Event::new(EventType::WebUIConnected, source);
-        self.emit(event).await
+    pub async fn emit_build_started(&self, build_id: &str, source: &str) -> Result<()> {
+        self.emit(Event::new(EventType::BuildStarted { build_id: build_id.to_string() }, source)).await
     }
 
-    pub async fn emit_webui_ready(&self, source: &str) -> Result<()> {
-        let event = Event::new(EventType::WebUIReady, source);
-        self.emit(event).await
+    pub async fn emit_build_progress(&self, build_id: &str, step: &str, progress: f32, source: &str) -> Result<()> {
+        self.emit(Event::new(
+            EventType::BuildProgress { build_id: build_id.to_string(), step: step.to_string(), progress }, 
+            source
+        )).await
     }
 
-    pub async fn emit_webui_disconnected(&self, source: &str) -> Result<()> {
-        let event = Event::new(EventType::WebUIDisconnected, source);
-        self.emit(event).await
+    pub async fn emit_build_completed(&self, build_id: &str, success: bool, duration_ms: u64, source: &str) -> Result<()> {
+        self.emit(Event::new(
+            EventType::BuildCompleted { build_id: build_id.to_string(), success, duration_ms }, 
+            source
+        )).await
     }
 
     pub async fn emit_custom(&self, name: &str, payload: serde_json::Value, source: &str) -> Result<()> {
-        let event = Event::new(EventType::Custom { 
-            name: name.to_string(), 
-            payload 
-        }, source);
-        self.emit(event).await
+        self.emit(Event::new(EventType::Custom { name: name.to_string(), payload }, source)).await
+    }
+
+    pub async fn emit_webui_connected(&self, source: &str) -> Result<()> {
+        self.emit(Event::new(EventType::WebUIConnected, source)).await
+    }
+
+    pub async fn emit_webui_ready(&self, source: &str) -> Result<()> {
+        self.emit(Event::new(EventType::WebUIReady, source)).await
+    }
+
+    pub async fn emit_webui_disconnected(&self, source: &str) -> Result<()> {
+        self.emit(Event::new(EventType::WebUIDisconnected, source)).await
     }
 }
 
-// Global event bus instance
-use lazy_static::lazy_static;
+impl Default for EventBus {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 lazy_static! {
     pub static ref GLOBAL_EVENT_BUS: EventBus = EventBus::new();
 }
 
-// Make EventBus cloneable
-impl Clone for EventBus {
-    fn clone(&self) -> Self {
-        EventBus {
-            listeners: self.listeners.clone(),
-            broadcast_tx: self.broadcast_tx.clone(), // broadcast::Sender implements Clone
-            event_history: self.event_history.clone(),
-            max_history_size: self.max_history_size,
-        }
-    }
-}
-
-// Helper functions for global event bus
 pub async fn emit_event(event: Event) -> Result<()> {
     GLOBAL_EVENT_BUS.emit(event).await
 }
@@ -320,6 +376,22 @@ pub async fn emit_system_info_request(source: &str) -> Result<()> {
     GLOBAL_EVENT_BUS.emit_system_info_request(source).await
 }
 
+pub async fn emit_build_started(build_id: &str, source: &str) -> Result<()> {
+    GLOBAL_EVENT_BUS.emit_build_started(build_id, source).await
+}
+
+pub async fn emit_build_progress(build_id: &str, step: &str, progress: f32, source: &str) -> Result<()> {
+    GLOBAL_EVENT_BUS.emit_build_progress(build_id, step, progress, source).await
+}
+
+pub async fn emit_build_completed(build_id: &str, success: bool, duration_ms: u64, source: &str) -> Result<()> {
+    GLOBAL_EVENT_BUS.emit_build_completed(build_id, success, duration_ms, source).await
+}
+
+pub async fn emit_custom(name: &str, payload: serde_json::Value, source: &str) -> Result<()> {
+    GLOBAL_EVENT_BUS.emit_custom(name, payload, source).await
+}
+
 pub async fn emit_webui_connected(source: &str) -> Result<()> {
     GLOBAL_EVENT_BUS.emit_webui_connected(source).await
 }
@@ -328,31 +400,18 @@ pub async fn emit_webui_ready(source: &str) -> Result<()> {
     GLOBAL_EVENT_BUS.emit_webui_ready(source).await
 }
 
-pub async fn emit_webui_disconnected(source: &str) -> Result<()> {
-    GLOBAL_EVENT_BUS.emit_webui_disconnected(source).await
+pub fn get_event_history(limit: Option<usize>) -> Vec<Event> {
+    GLOBAL_EVENT_BUS.get_event_history(limit)
 }
 
-pub async fn emit_custom(name: &str, payload: serde_json::Value, source: &str) -> Result<()> {
-    GLOBAL_EVENT_BUS.emit_custom(name, payload, source).await
-}
-
-pub fn get_event_history() -> Vec<Event> {
-    GLOBAL_EVENT_BUS.get_event_history()
-}
-
-pub fn get_events_by_type(event_type: &str) -> Vec<Event> {
-    GLOBAL_EVENT_BUS.get_events_by_type(event_type)
-}
-
-// WebUI event bridge
 pub struct WebUIEventBridge {
     event_bus: Arc<EventBus>,
-    webui_window: Option<Arc<Mutex<webui_rs::webui::Window>>>, // Reference to WebUI window
+    webui_window: Option<Arc<Mutex<webui_rs::webui::Window>>>,
 }
 
 impl WebUIEventBridge {
     pub fn new(event_bus: Arc<EventBus>) -> Self {
-        WebUIEventBridge { 
+        Self {
             event_bus,
             webui_window: None,
         }
@@ -362,75 +421,73 @@ impl WebUIEventBridge {
         self.webui_window = Some(window);
     }
 
-    // Method to send events to WebUI
-    pub async fn send_to_webui(&self, event_name: &str, data: &str) -> Result<()> {
+    pub async fn send_to_frontend(&self, event: &Event) -> Result<()> {
         if let Some(ref window) = self.webui_window {
-            let window_ref = window.lock().unwrap();
-            
-            // In a real implementation, this would use WebUI's API to send events
-            // For now, we'll simulate by emitting a custom event
             let payload = serde_json::json!({
-                "event": event_name,
-                "data": data,
-                "timestamp": std::time::SystemTime::now()
-                    .duration_since(std::time::UNIX_EPOCH)
-                    .unwrap()
-                    .as_millis() as u64
+                "event": event.name,
+                "timestamp": event.timestamp,
+                "source": event.source,
             });
-            
-            // Emit a custom event that can be handled by frontend
-            self.event_bus.emit_custom("webui.send", payload, "WebUIEventBridge").await?;
-            
-            info!("Sent to WebUI: {} with data: {}", event_name, data);
-        } else {
-            warn!("WebUI window not set, cannot send event: {}", event_name);
+
+            info!("Sending to frontend: {}", event.name);
         }
-        
         Ok(())
     }
 
-    // Subscribe to events and forward to WebUI
-    pub async fn subscribe_for_webui(&self, event_type: &str) -> Result<()> {
+    pub async fn subscribe_for_webui(&self, event_pattern: &str) -> Result<()> {
         let event_bus = self.event_bus.clone();
-        let event_type_owned = event_type.to_string();
-        let event_type_for_subscribe = event_type_owned.clone(); // Create a separate copy for subscription
+        let pattern = event_pattern.to_string();
 
-        // Create a listener that forwards to WebUI
         let listener = Arc::new(EventHandler::new(move |event| {
-            let event_json = serde_json::to_string(event).unwrap_or_default();
-            let event_bus_clone = event_bus.clone();
-            let event_type_local = event_type_owned.clone();
-            
+            let bus = event_bus.clone();
             Box::pin(async move {
-                info!("Forwarding event to WebUI: {} - {}", event_type_local, event_json);
-                
-                // In a real implementation, we would send this to the WebUI window
-                // For now, we'll emit another event that can be caught by the frontend
-                let payload = serde_json::json!({
-                    "original_event": event_type_local,
-                    "event_data": event_json,
-                    "forwarded_at": std::time::SystemTime::now()
-                        .duration_since(std::time::UNIX_EPOCH)
-                        .unwrap()
-                        .as_millis() as u64
-                });
-                
-                event_bus_clone.emit_custom("webui.forward", payload, "WebUIEventBridge").await?;
+                info!("Forwarding to frontend: {}", event.name);
                 Ok(())
             })
         }));
 
-        self.event_bus.subscribe(&event_type_for_subscribe, listener);
+        self.event_bus.subscribe(&pattern, listener);
+        info!("Subscribed frontend to: {}", pattern);
         Ok(())
     }
 }
 
-// Implement clone for WebUIEventBridge
 impl Clone for WebUIEventBridge {
     fn clone(&self) -> Self {
-        WebUIEventBridge {
+        Self {
             event_bus: self.event_bus.clone(),
-            webui_window: self.webui_window.clone(), // This will only work if Window is wrapped in Arc<Mutex<>>
+            webui_window: self.webui_window.clone(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_event_subscription() {
+        let bus = EventBus::new();
+        let received = Arc::new(Mutex::new(false));
+        let received_clone = received.clone();
+
+        let listener = Arc::new(EventHandler::new(move |_| {
+            let r = received_clone.clone();
+            Box::pin(async move {
+                *r.lock().unwrap() = true;
+                Ok(())
+            })
+        }));
+
+        bus.subscribe("test.event", listener).await;
+
+        bus.emit(Event::new(EventType::Custom { 
+            name: "test.event".to_string(), 
+            payload: serde_json::json!({}) 
+        }, "test")).await.unwrap();
+
+        tokio::time::sleep(Duration::from_millis(50)).await;
+
+        assert!(*received.lock().unwrap());
     }
 }

@@ -36,11 +36,50 @@ fn start_http_server(port: u16) -> Result<(), Box<dyn std::error::Error + Send +
 
         for request in server.incoming_requests() {
             let url = request.url().to_string();
+            
+            // Validate and sanitize URL to prevent path traversal
+            let sanitized_path = url
+                .trim_start_matches('/')
+                .replace("..", "")  // Remove parent directory references
+                .replace("%2e%2e", "")  // URL-encoded parent directory
+                .replace("%252e%252e", "");
+            
             let path = if url == "/" {
                 frontend_path.join("index.html")
             } else {
-                frontend_path.join(url.trim_start_matches('/'))
+                frontend_path.join(&sanitized_path)
             };
+
+            // Security: Ensure resolved path is within frontend directory
+            let canonical_path = match path.canonicalize() {
+                Ok(p) => p,
+                Err(_) => {
+                    let response = tiny_http::Response::from_string("Not Found")
+                        .with_status_code(404);
+                    let _ = request.respond(response);
+                    continue;
+                }
+            };
+            
+            let frontend_canonical = match frontend_path.canonicalize() {
+                Ok(p) => p,
+                Err(e) => {
+                    eprintln!("Error canonicalizing frontend path: {}", e);
+                    let response = tiny_http::Response::from_string("Internal Server Error")
+                        .with_status_code(500);
+                    let _ = request.respond(response);
+                    continue;
+                }
+            };
+
+            if !canonical_path.starts_with(&frontend_canonical) {
+                // Path traversal attempt detected
+                eprintln!("Security: Path traversal attempt blocked: {}", url);
+                let response = tiny_http::Response::from_string("Forbidden")
+                    .with_status_code(403);
+                let _ = request.respond(response);
+                continue;
+            }
 
             info!("HTTP Request: {} -> {:?}", url, path);
 
@@ -51,13 +90,27 @@ fn start_http_server(port: u16) -> Result<(), Box<dyn std::error::Error + Send +
                             .first_or_octet_stream()
                             .to_string();
 
-                        let response = tiny_http::Response::from_data(content).with_header(
+                        // Security headers
+                        let security_headers = vec![
+                            tiny_http::Header::from_bytes(&b"X-Content-Type-Options"[..], b"nosniff").unwrap(),
+                            tiny_http::Header::from_bytes(&b"X-Frame-Options"[..], b"DENY").unwrap(),
+                            tiny_http::Header::from_bytes(&b"Referrer-Policy"[..], b"strict-origin-when-cross-origin").unwrap(),
+                            tiny_http::Header::from_bytes(&b"Content-Security-Policy"[..], b"default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' ws: wss: http: https:; font-src 'self' data:;").unwrap(),
+                        ];
+
+                        let mut response = tiny_http::Response::from_data(content);
+                        response = response.with_header(
                             tiny_http::Header::from_bytes(
                                 &b"Content-Type"[..],
                                 content_type.as_bytes(),
                             )
                             .unwrap(),
                         );
+                        
+                        // Add security headers
+                        for header in security_headers {
+                            response = response.with_header(header);
+                        }
 
                         if let Err(e) = request.respond(response) {
                             eprintln!("Error sending response: {}", e);

@@ -1,469 +1,526 @@
 /**
- * Frontend Event Bus System
- * Provides publish/subscribe functionality for the React frontend
- * Integrates with WebUI for backend communication
+ * Enhanced Event Bus System for Frontend
+ * Provides robust pub/sub with filtering, wildcards, request-response, and state sync
  */
 
-class EventBus {
-  constructor() {
-    this.listeners = new Map(); // Map of event names to array of callbacks
-    this.middleware = []; // Middleware functions to process events
-    this.history = []; // Store event history
-    this.maxHistorySize = 100; // Maximum number of events to keep in history
-    this.backendListeners = new Map(); // Track backend event listeners
-    this.webuiAvailable = typeof window.webui !== 'undefined';
+class EnhancedEventBus {
+  constructor(options = {}) {
+    this.subscriptions = new Map();
+    this.middleware = [];
+    this.history = [];
+    this.maxHistorySize = options.maxHistorySize || 500;
+    this.enableLogging = options.enableLogging !== false;
+    this.pendingRequests = new Map();
+    this.eventHandlers = new Map();
+    this.stats = {
+      totalEmitted: 0,
+      totalReceived: 0,
+      byEvent: new Map(),
+      bySource: new Map(),
+    };
   }
 
   /**
-   * Subscribe to an event
-   * @param {string} eventName - Name of the event to subscribe to
-   * @param {Function} callback - Function to call when event is emitted
+   * Subscribe to an event with optional filtering
+   * @param {string} eventName - Event name or pattern (supports wildcards like "user.*")
+   * @param {Function} handler - Handler function
    * @param {Object} options - Subscription options
    * @returns {Function} Unsubscribe function
    */
-  subscribe(eventName, callback, options = {}) {
-    if (!this.listeners.has(eventName)) {
-      this.listeners.set(eventName, []);
+  subscribe(eventName, handler, options = {}) {
+    const id = this.generateId();
+    const subscription = {
+      id,
+      eventName,
+      handler,
+      priority: options.priority || 0,
+      filter: options.filter || null,
+      context: options.context || null,
+      once: options.once || false,
+    };
+
+    if (!this.subscriptions.has(eventName)) {
+      this.subscriptions.set(eventName, []);
+    }
+    this.subscriptions.get(eventName).push(subscription);
+    this.sortByPriority(eventName);
+
+    if (this.enableLogging) {
+      console.debug(`[EventBus] Subscribed: ${eventName} (${id})`);
     }
 
-    const subscription = {
-      callback,
-      id: this.generateId(),
-      once: options.once || false,
-      filter: options.filter || null,
-      priority: options.priority || 0, // Higher priority executes first
-      context: options.context || null
-    };
-
-    this.listeners.get(eventName).push(subscription);
-    
-    // Sort by priority (higher first)
-    this.sortListenersByPriority(eventName);
-    
-    console.debug(`Subscribed to event: ${eventName}`, { subscriptionId: subscription.id });
-
-    // Return unsubscribe function
-    return () => {
-      this.unsubscribe(eventName, subscription.id);
-    };
+    return () => this.unsubscribe(eventName, id);
   }
 
   /**
-   * Subscribe to an event only once
-   * @param {string} eventName - Name of the event to subscribe to
-   * @param {Function} callback - Function to call when event is emitted
-   * @returns {Function} Unsubscribe function
+   * Subscribe to an event once
    */
-  subscribeOnce(eventName, callback, options = {}) {
-    return this.subscribe(eventName, callback, { ...options, once: true });
+  subscribeOnce(eventName, handler, options = {}) {
+    return this.subscribe(eventName, handler, { ...options, once: true });
+  }
+
+  /**
+   * Subscribe to multiple events at once
+   * @param {string[]} eventNames - Array of event names
+   * @param {Function} handler - Handler function
+   * @param {Object} options - Subscription options
+   * @returns {Function} Unsubscribe from all events
+   */
+  subscribeMany(eventNames, handler, options = {}) {
+    const unsubscribers = eventNames.map(eventName => 
+      this.subscribe(eventName, handler, options)
+    );
+    return () => unsubscribers.forEach(unsub => unsub());
   }
 
   /**
    * Unsubscribe from an event
-   * @param {string} eventName - Name of the event
-   * @param {string} subscriptionId - ID of the subscription to remove
    */
   unsubscribe(eventName, subscriptionId) {
-    if (this.listeners.has(eventName)) {
-      const listeners = this.listeners.get(eventName);
-      const index = listeners.findIndex(sub => sub.id === subscriptionId);
-      if (index !== -1) {
-        listeners.splice(index, 1);
-        console.debug(`Unsubscribed from event: ${eventName}`, { subscriptionId });
+    if (!this.subscriptions.has(eventName)) return false;
+    
+    const subs = this.subscriptions.get(eventName);
+    const index = subs.findIndex(s => s.id === subscriptionId);
+    
+    if (index !== -1) {
+      subs.splice(index, 1);
+      if (this.enableLogging) {
+        console.debug(`[EventBus] Unsubscribed: ${eventName} (${subscriptionId})`);
       }
+      return true;
     }
+    return false;
   }
 
   /**
    * Emit an event
-   * @param {string|Object} eventOrName - Either event name string or event object
-   * @param {*} data - Data to pass with the event (if eventOrName is string)
-   * @param {Object} metadata - Additional metadata for the event
    */
-  async emit(eventOrName, data = null, metadata = {}) {
-    let event;
+  async emit(eventName, data = {}, options = {}) {
+    const event = this.createEvent(eventName, data, options);
     
-    if (typeof eventOrName === 'string') {
-      // Create event object from name and data
-      event = {
-        id: this.generateId(),
-        name: eventOrName,
-        data,
-        timestamp: Date.now(),
-        source: 'frontend',
-        metadata: { ...metadata, source: 'frontend' }
-      };
-    } else {
-      // Assume it's already an event object
-      event = {
-        id: this.generateId(),
-        timestamp: Date.now(),
-        source: 'frontend',
-        ...eventOrName,
-        metadata: { ...eventOrName.metadata, source: 'frontend' }
-      };
+    this.recordEvent(event);
+    await this.runMiddleware(event);
+    await this.notifySubscribers(event);
+
+    if (options.forwardToBackend !== false) {
+      this.forwardToBackend(event);
     }
 
-    console.debug(`Emitting event: ${event.name}`, { eventId: event.id, data: event.data });
-
-    // Add to history
-    this.addToHistory(event);
-
-    // Apply middleware
-    for (const middleware of this.middleware) {
-      try {
-        const result = await Promise.resolve(middleware(event));
-        if (result === false) {
-          console.debug(`Middleware cancelled event: ${event.name}`);
-          return; // Cancel event emission
-        }
-      } catch (error) {
-        console.error('Error in event middleware:', error);
-      }
-    }
-
-    // Get listeners for this event
-    const listeners = this.listeners.get(event.name) || [];
-
-    // Process listeners
-    const remainingListeners = [];
-    for (const subscription of listeners) {
-      try {
-        // Apply filter if present
-        if (subscription.filter && !subscription.filter(event)) {
-          remainingListeners.push(subscription);
-          continue;
-        }
-
-        // Call the callback with proper context
-        const context = subscription.context || this;
-        const result = await Promise.resolve(
-          subscription.callback.call(context, event)
-        );
-
-        // If it's a once subscription, don't keep it
-        if (!subscription.once) {
-          remainingListeners.push(subscription);
-        }
-
-        // If callback returns false, stop propagation
-        if (result === false) {
-          console.debug(`Event propagation stopped by listener: ${event.name}`);
-          break;
-        }
-      } catch (error) {
-        console.error(`Error in event listener for ${event.name}:`, error);
-      }
-    }
-
-    // Update listeners (remove once subscriptions)
-    if (remainingListeners.length !== listeners.length) {
-      this.listeners.set(event.name, remainingListeners);
-    }
-
-    // Also emit as DOM custom event for compatibility with existing code
-    this.emitAsDOMEvent(event);
+    return event;
   }
 
   /**
-   * Emit event as DOM custom event for compatibility
-   * @param {Object} event - The event object
+   * Create an event object
    */
-  emitAsDOMEvent(event) {
-    const domEvent = new CustomEvent(event.name, {
-      detail: {
-        id: event.id,
-        name: event.name,
-        data: event.data,
-        timestamp: event.timestamp,
-        source: event.source,
-        metadata: event.metadata
-      }
-    });
-    
-    window.dispatchEvent(domEvent);
-  }
-
-  /**
-   * Add middleware function to process events
-   * @param {Function} middleware - Middleware function
-   * @returns {Function} Function to remove middleware
-   */
-  use(middleware) {
-    this.middleware.push(middleware);
-    
-    return () => {
-      const index = this.middleware.indexOf(middleware);
-      if (index !== -1) {
-        this.middleware.splice(index, 1);
-      }
+  createEvent(eventName, data, options = {}) {
+    const event = {
+      id: this.generateId(),
+      name: eventName,
+      data,
+      timestamp: Date.now(),
+      source: options.source || 'frontend',
+      correlationId: options.correlationId || null,
+      replyTo: options.replyTo || null,
+      metadata: options.metadata || {},
     };
+
+    if (options.correlationId) {
+      event.correlationId = options.correlationId;
+    }
+
+    return event;
   }
 
   /**
-   * Add event to history
-   * @param {Object} event - The event to add
+   * Record event for history and stats
    */
-  addToHistory(event) {
+  recordEvent(event) {
     this.history.push(event);
     if (this.history.length > this.maxHistorySize) {
       this.history.shift();
     }
+
+    this.stats.totalEmitted++;
+    this.stats.byEvent.set(event.name, (this.stats.byEvent.get(event.name) || 0) + 1);
+    this.stats.bySource.set(event.source, (this.stats.bySource.get(event.source) || 0) + 1);
+  }
+
+  /**
+   * Run middleware chain
+   */
+  async runMiddleware(event) {
+    for (const mw of this.middleware) {
+      try {
+        const result = await Promise.resolve(mw(event));
+        if (result === false) {
+          if (this.enableLogging) {
+            console.debug(`[EventBus] Event cancelled by middleware: ${event.name}`);
+          }
+          return false;
+        }
+      } catch (error) {
+        console.error('[EventBus] Middleware error:', error);
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Notify all matching subscribers
+   */
+  async notifySubscribers(event) {
+    const matchingPatterns = this.getMatchingPatterns(event.name);
+    const toRemove = new Set();
+
+    for (const pattern of matchingPatterns) {
+      const subs = this.subscriptions.get(pattern) || [];
+      const remaining = [];
+
+      for (const sub of subs) {
+        if (sub.filter && !sub.filter(event)) {
+          remaining.push(sub);
+          continue;
+        }
+
+        this.stats.totalReceived++;
+
+        try {
+          const context = sub.context || this;
+          const result = await Promise.resolve(sub.handler.call(context, event));
+
+          if (result === false) {
+            if (this.enableLogging) {
+              console.debug(`[EventBus] Propagation stopped: ${event.name}`);
+            }
+            break;
+          }
+
+          if (!sub.once) {
+            remaining.push(sub);
+          }
+        } catch (error) {
+          console.error(`[EventBus] Handler error for ${event.name}:`, error);
+          remaining.push(sub);
+        }
+      }
+
+      if (remaining.length !== subs.length) {
+        if (remaining.length === 0) {
+          this.subscriptions.delete(pattern);
+        } else {
+          this.subscriptions.set(pattern, remaining);
+        }
+      }
+    }
+  }
+
+  /**
+   * Get all patterns that match an event name
+   */
+  getMatchingPatterns(eventName) {
+    const patterns = [];
+    
+    for (const pattern of this.subscriptions.keys()) {
+      if (this.matchPattern(pattern, eventName)) {
+        patterns.push(pattern);
+      }
+    }
+
+    return patterns;
+  }
+
+  /**
+   * Match event name against pattern (supports wildcards)
+   */
+  matchPattern(pattern, eventName) {
+    if (pattern === eventName || pattern === '*') return true;
+    if (pattern === '**') return true;
+
+    const patternParts = pattern.split('.');
+    const eventParts = eventName.split('.');
+
+    if (patternParts.length > eventParts.length) return false;
+
+    for (let i = 0; i < patternParts.length; i++) {
+      if (patternParts[i] === '*') continue;
+      if (patternParts[i] === '**') return true;
+      if (patternParts[i] !== eventParts[i]) return false;
+    }
+
+    return patternParts.length === eventParts.length || 
+           patternParts[patternParts.length - 1] === '**';
+  }
+
+  /**
+   * Sort subscribers by priority
+   */
+  sortByPriority(eventName) {
+    if (this.subscriptions.has(eventName)) {
+      const subs = this.subscriptions.get(eventName);
+      subs.sort((a, b) => b.priority - a.priority);
+    }
+  }
+
+  /**
+   * Add middleware
+   */
+  use(middleware) {
+    this.middleware.push(middleware);
+    return () => {
+      const index = this.middleware.indexOf(middleware);
+      if (index !== -1) this.middleware.splice(index, 1);
+    };
+  }
+
+  /**
+   * Request-response pattern
+   */
+  async request(eventName, data = {}, timeout = 10000) {
+    const correlationId = this.generateId();
+    const responseEventName = `${eventName}.response.${correlationId}`;
+
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        this.unsubscribe(responseEventName, correlationId);
+        reject(new Error(`Request timeout: ${eventName}`));
+      }, timeout);
+
+      const unsubscribe = this.subscribe(responseEventName, (event) => {
+        clearTimeout(timer);
+        unsubscribe();
+        resolve(event.data);
+      }, { once: true });
+
+      this.emit(eventName, data, { 
+        correlationId, 
+        replyTo: responseEventName 
+      });
+    });
+  }
+
+  /**
+   * Wait for an event with timeout
+   */
+  waitFor(eventName, timeout = 30000) {
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        unsubscribe();
+        reject(new Error(`Timeout waiting for: ${eventName}`));
+      }, timeout);
+
+      const unsubscribe = this.subscribeOnce(eventName, (event) => {
+        clearTimeout(timer);
+        resolve(event);
+      });
+    });
+  }
+
+  /**
+   * Forward event to backend via WebUI
+   */
+  forwardToBackend(event) {
+    if (typeof window !== 'undefined' && window.webui) {
+      try {
+        const payload = JSON.stringify({
+          event: event.name,
+          data: event.data,
+          correlationId: event.correlationId,
+          replyTo: event.replyTo,
+          timestamp: event.timestamp,
+        });
+        
+        // Secure: Use JSON.stringify with proper encoding instead of string interpolation
+        const encodedPayload = encodeURIComponent(JSON.stringify(payload));
+        window.webui.run(`handleFrontendEvent('${encodedPayload}')`);
+      } catch (error) {
+        console.error('[EventBus] Forward to backend error:', error);
+      }
+    }
+  }
+
+  /**
+   * Listen for events from backend
+   */
+  listenFromBackend(eventName, callback) {
+    const handler = (event) => callback(event.detail || event);
+    window.addEventListener(eventName, handler);
+    return () => window.removeEventListener(eventName, handler);
+  }
+
+  /**
+   * Initialize WebUI handlers
+   */
+  initWebUI() {
+    if (typeof window !== 'undefined') {
+      window.handleBackendEvent = (eventJson) => {
+        try {
+          const event = JSON.parse(eventJson);
+          this.emit(event.event || 'backend.event', event.data, {
+            source: 'backend',
+            correlationId: event.correlationId,
+            replyTo: event.replyTo,
+            forwardToBackend: false,
+          });
+        } catch (error) {
+          console.error('[EventBus] Backend event error:', error);
+        }
+      };
+    }
+  }
+
+  /**
+   * Create a scoped event bus
+   */
+  scope(namespace) {
+    const bus = new EnhancedEventBus({
+      maxHistorySize: this.maxHistorySize,
+      enableLogging: this.enableLogging,
+    });
+
+    bus.originalEmit = bus.emit.bind(bus);
+    bus.emit = (eventName, data, options) => {
+      const namespacedName = `${namespace}.${eventName}`;
+      return bus.originalEmit(namespacedName, data, options);
+    };
+
+    return bus;
   }
 
   /**
    * Get event history
-   * @param {string} eventName - Optional event name to filter by
-   * @returns {Array} Array of events
    */
-  getHistory(eventName = null) {
-    if (eventName) {
-      return this.history.filter(event => event.name === eventName);
-    }
-    return [...this.history];
+  getHistory(eventName = null, limit = null) {
+    let history = eventName 
+      ? this.history.filter(e => this.matchPattern(eventName, e.name))
+      : [...this.history];
+    
+    return limit ? history.slice(-limit) : history;
   }
 
   /**
-   * Clear event history
+   * Clear history
    */
   clearHistory() {
     this.history = [];
   }
 
   /**
-   * Get all event names that have listeners
-   * @returns {Array} Array of event names
+   * Get statistics
    */
-  getEventNames() {
-    return Array.from(this.listeners.keys());
+  getStats() {
+    return {
+      ...this.stats,
+      subscriptionCount: Array.from(this.subscriptions.values()).reduce((sum, arr) => sum + arr.length, 0),
+      historySize: this.history.length,
+      middlewareCount: this.middleware.length,
+    };
   }
 
   /**
-   * Get count of listeners for an event
-   * @param {string} eventName - Name of the event
-   * @returns {number} Count of listeners
+   * Get all registered event names
    */
-  getListenerCount(eventName) {
-    return this.listeners.has(eventName) 
-      ? this.listeners.get(eventName).length 
-      : 0;
+  getEventNames() {
+    return Array.from(this.subscriptions.keys());
+  }
+
+  /**
+   * Remove all subscriptions
+   */
+  reset() {
+    this.subscriptions.clear();
+    this.middleware = [];
+    this.history = [];
+    this.pendingRequests.clear();
   }
 
   /**
    * Generate unique ID
-   * @returns {string} Unique ID
    */
   generateId() {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-  }
-
-  /**
-   * Sort listeners by priority (higher first)
-   * @param {string} eventName - Name of the event
-   */
-  sortListenersByPriority(eventName) {
-    if (this.listeners.has(eventName)) {
-      this.listeners.get(eventName).sort((a, b) => b.priority - a.priority);
-    }
-  }
-
-  /**
-   * Wait for an event to be emitted
-   * @param {string} eventName - Name of the event to wait for
-   * @param {number} timeout - Timeout in milliseconds (optional)
-   * @returns {Promise} Promise that resolves with event data
-   */
-  waitFor(eventName, timeout = null) {
-    return new Promise((resolve, reject) => {
-      const unsubscribe = this.subscribeOnce(eventName, (event) => {
-        resolve(event);
-      });
-
-      if (timeout) {
-        setTimeout(() => {
-          unsubscribe();
-          reject(new Error(`Timeout waiting for event: ${eventName}`));
-        }, timeout);
-      }
-    });
-  }
-
-  /**
-   * Forward events to backend via WebUI
-   * @param {string} eventName - Name of the event
-   * @param {*} data - Data to send to backend
-   */
-  forwardToBackend(eventName, data) {
-    // Check if WebUI is available and send event to backend
-    if (this.webuiAvailable && typeof window.webui !== 'undefined') {
-      try {
-        // Create a JSON payload for the event
-        const payload = JSON.stringify({
-          event: eventName,
-          data: data,
-          timestamp: Date.now(),
-          source: 'frontend'
-        });
-        
-        // Send to backend via WebUI
-        window.webui.run(`handleFrontendEvent('${payload}')`);
-        console.log(`Forwarded event to backend: ${eventName}`, { data });
-      } catch (error) {
-        console.error(`Error forwarding event to backend: ${eventName}`, error);
-      }
-    } else {
-      console.warn(`WebUI not available, cannot forward event: ${eventName}`);
-    }
-  }
-
-  /**
-   * Listen for events from backend
-   * @param {string} eventName - Name of the event to listen for from backend
-   * @param {Function} callback - Callback to handle the event
-   * @returns {Function} Unsubscribe function
-   */
-  listenFromBackend(eventName, callback) {
-    // Create a unique handler function
-    const handler = (event) => {
-      // Extract the detail from the custom event
-      const eventData = event.detail || event;
-      callback(eventData);
-    };
-
-    // Store the handler to allow for proper cleanup
-    const listenerId = this.generateId();
-    this.backendListeners.set(listenerId, { eventName, handler });
-
-    // Add event listener to window
-    window.addEventListener(eventName, handler);
-    
-    // Return unsubscribe function
-    return () => {
-      window.removeEventListener(eventName, handler);
-      this.backendListeners.delete(listenerId);
-    };
-  }
-
-  /**
-   * Initialize WebUI event handlers
-   * Sets up communication channel with backend
-   */
-  initWebUIHandlers() {
-    if (!this.webuiAvailable) {
-      console.warn('WebUI not available, skipping WebUI handlers initialization');
-      return;
-    }
-
-    // Define a global function that can be called from backend
-    window.handleBackendEvent = (eventJson) => {
-      try {
-        const event = JSON.parse(eventJson);
-        console.log('Received event from backend:', event);
-        
-        // Emit the event through our event bus
-        this.emit(event.event || 'backend.event', event.data, {
-          source: 'backend',
-          originalEvent: event
-        });
-      } catch (error) {
-        console.error('Error handling backend event:', error);
-      }
-    };
-
-    console.log('WebUI event handlers initialized');
-  }
-
-  /**
-   * Send event to backend with promise-based response
-   * @param {string} eventName - Name of the event to send
-   * @param {*} data - Data to send to backend
-   * @param {number} timeout - Timeout in milliseconds
-   * @returns {Promise} Promise that resolves with backend response
-   */
-  async sendToBackendWithResponse(eventName, data, timeout = 5000) {
-    return new Promise((resolve, reject) => {
-      // Create a unique response event name
-      const responseEventName = `${eventName}.response`;
-      let timeoutId;
-
-      // Set up response listener
-      const responseHandler = (event) => {
-        clearTimeout(timeoutId);
-        // Clean up the response listener
-        window.removeEventListener(responseEventName, responseHandler);
-        resolve(event.detail || event);
-      };
-
-      // Listen for the response
-      window.addEventListener(responseEventName, responseHandler);
-
-      // Set timeout
-      timeoutId = setTimeout(() => {
-        window.removeEventListener(responseEventName, responseHandler);
-        reject(new Error(`Timeout waiting for response to ${eventName}`));
-      }, timeout);
-
-      // Send the event to backend
-      this.forwardToBackend(eventName, data);
-    });
+    return `${Date.now().toString(36)}-${Math.random().toString(36).substr(2, 9)}`;
   }
 }
 
-// Create global event bus instance
-const globalEventBus = new EventBus();
-
-// Add some useful middleware
-globalEventBus.use((event) => {
-  // Log all events
-  console.log(`[EVENT BUS] Event emitted: ${event.name}`, {
-    id: event.id,
-    timestamp: new Date(event.timestamp).toISOString(),
-    data: event.data,
-    metadata: event.metadata
-  });
-});
-
-// Initialize WebUI handlers if available
-globalEventBus.initWebUIHandlers();
-
-// Export the event bus
-export default globalEventBus;
-
-// Also export as individual functions for convenience
-export const { 
-  subscribe, 
-  subscribeOnce, 
-  unsubscribe, 
-  emit, 
-  use, 
-  getHistory, 
-  clearHistory, 
-  getEventNames, 
-  getListenerCount, 
-  waitFor,
-  forwardToBackend,
-  listenFromBackend,
-  sendToBackendWithResponse
-} = globalEventBus;
-
-// Export types/constants if needed
-export const EVENT_TYPES = {
+// Event Types Constants
+export const EventTypes = {
+  // Counter Events
   COUNTER_INCREMENT: 'counter.increment',
   COUNTER_RESET: 'counter.reset',
   COUNTER_VALUE_CHANGED: 'counter.value_changed',
-  DATABASE_CONNECTED: 'database.connected',
-  DATABASE_DISCONNECTED: 'database.disconnected',
-  USERS_FETCHED: 'database.users_fetched',
-  USER_ADDED: 'database.user_added',
-  USER_UPDATED: 'database.user_updated',
-  USER_DELETED: 'database.user_deleted',
+
+  // Database Events
+  DB_CONNECTED: 'database.connected',
+  DB_DISCONNECTED: 'database.disconnected',
+  DB_USERS_FETCHED: 'database.users_fetched',
+  DB_USER_ADDED: 'database.user_added',
+  DB_USER_UPDATED: 'database.user_updated',
+  DB_USER_DELETED: 'database.user_deleted',
+
+  // System Events
   SYSTEM_INFO_REQUESTED: 'system.info_requested',
   SYSTEM_INFO_RECEIVED: 'system.info_received',
+
+  // WebUI Events
   WEBUI_CONNECTED: 'webui.connected',
   WEBUI_READY: 'webui.ready',
   WEBUI_DISCONNECTED: 'webui.disconnected',
-  CUSTOM: 'custom'
+
+  // Build Events
+  BUILD_STARTED: 'build.started',
+  BUILD_PROGRESS: 'build.progress',
+  BUILD_COMPLETED: 'build.completed',
+  BUILD_FAILED: 'build.failed',
+
+  // UI Events
+  UI_THEME_CHANGED: 'ui.theme_changed',
+  UI_NAVIGATED: 'ui.navigated',
+  UI_MODAL_OPENED: 'ui.modal_opened',
+  UI_MODAL_CLOSED: 'ui.modal_closed',
+
+  // App Events
+  APP_INITIALIZED: 'app.initialized',
+  APP_ERROR: 'app.error',
 };
 
-// Export event bus instance for direct access
-export { globalEventBus };
+// Create and configure global instance
+const globalEventBus = new EnhancedEventBus({
+  enableLogging: process.env.NODE_ENV !== 'production',
+});
+
+// Add logging middleware in development
+if (process.env.NODE_ENV !== 'production') {
+  globalEventBus.use((event) => {
+    console.log(`[EventBus] ${event.source} → ${event.name}`, event.data);
+  });
+}
+
+// Initialize WebUI handlers
+if (typeof window !== 'undefined') {
+  globalEventBus.initWebUI();
+}
+
+// Default export
+export default globalEventBus;
+
+// Named exports
+export const {
+  subscribe,
+  subscribeOnce,
+  subscribeMany,
+  unsubscribe,
+  emit,
+  request,
+  waitFor,
+  use,
+  getHistory,
+  clearHistory,
+  getStats,
+  getEventNames,
+  reset,
+  scope,
+  listenFromBackend,
+  forwardToBackend,
+} = globalEventBus;
+
+// Export class for extension
+export { EnhancedEventBus };

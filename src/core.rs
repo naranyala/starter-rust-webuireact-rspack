@@ -5,16 +5,16 @@ use std::fs;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 use tracing::{info, Level};
-use tracing_subscriber::{
-    fmt,
-    layer::SubscriberExt,
-    util::SubscriberInitExt,
-    EnvFilter,
-};
+use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
 // Import the build logger and event bus (these are defined at the crate root)
-pub use crate::build_logger::{BuildLogEntry, TimedBuildLogger, BuildLogger};
-pub use crate::event_bus::{EventBus, Event, EventType, GLOBAL_EVENT_BUS, emit_event, emit_counter_increment, emit_counter_reset, emit_counter_value_changed, emit_users_fetched, emit_system_info_request, emit_webui_connected, emit_webui_ready, WebUIEventBridge};
+pub use crate::build_logger::{BuildLogEntry, BuildLogger, TimedBuildLogger};
+pub use crate::event_bus::{
+    emit_build_completed, emit_build_progress, emit_build_started, emit_counter_increment,
+    emit_counter_reset, emit_counter_value_changed, emit_custom, emit_event,
+    emit_system_info_request, emit_users_fetched, emit_webui_connected, emit_webui_ready, Event,
+    EventBus, EventType, WebUIEventBridge, GLOBAL_EVENT_BUS,
+};
 
 // Consolidated core functionality
 // Combines: config, logging, database, and other infrastructure modules
@@ -49,9 +49,9 @@ pub struct LoggingSettings {
     pub level: String,
     pub file: String,
     pub append: Option<bool>,
-    pub format: Option<String>, // Added format option
+    pub format: Option<String>,     // Added format option
     pub max_file_size: Option<u64>, // Added max file size for rotation
-    pub max_files: Option<usize>, // Added max number of files for rotation
+    pub max_files: Option<usize>,   // Added max number of files for rotation
 }
 
 impl Default for AppConfig {
@@ -74,7 +74,7 @@ impl Default for AppConfig {
                 append: Some(true),
                 format: Some(String::from("text")), // Default to text format
                 max_file_size: Some(10 * 1024 * 1024), // 10MB default
-                max_files: Some(5), // Keep 5 rotated files
+                max_files: Some(5),                 // Keep 5 rotated files
             },
         }
     }

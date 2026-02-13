@@ -162,7 +162,8 @@ async function buildFrontend() {
 </html>`;
 
       // Ensure webui.js is included in the inline HTML
-      if (!inlineHtml.includes('/webui.js')) {
+      const hasWebuiScript = inlineHtml.includes('/webui.js') || inlineHtml.includes('webui.js');
+      if (!hasWebuiScript) {
         // Add webui.js script to the inline HTML before other scripts
         inlineHtml = inlineHtml.replace(
           /(<body>)/,

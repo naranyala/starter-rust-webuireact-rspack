@@ -1,18 +1,20 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 
 export interface ErrorInfo {
   id: string;
   message: string;
-  type: 'error' | 'warning' | 'info';
+  type: 'error' | 'warning' | 'info' | 'critical';
   timestamp: Date;
   details?: string;
   stack?: string;
+  source?: 'uncaught' | 'unhandled-rejection' | 'component' | 'api';
 }
 
 interface ErrorContextType {
   errors: ErrorInfo[];
+  hasCriticalErrors: boolean;
   addError: (message: string, type?: ErrorInfo['type'], details?: string) => void;
-  addErrorFromException: (error: Error | unknown) => void;
+  addErrorFromException: (error: Error | unknown, source?: ErrorInfo['source']) => void;
   removeError: (id: string) => void;
   clearErrors: () => void;
 }
@@ -45,7 +47,7 @@ export const ErrorProvider: React.FC<ErrorProviderProps> = ({ children }) => {
     setErrors(prev => [...prev, error]);
   }, []);
 
-  const addErrorFromException = useCallback((error: Error | unknown) => {
+  const addErrorFromException = useCallback((error: Error | unknown, source: ErrorInfo['source'] = 'uncaught') => {
     const err = error as Error;
     const errorInfo: ErrorInfo = {
       id: `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -54,6 +56,7 @@ export const ErrorProvider: React.FC<ErrorProviderProps> = ({ children }) => {
       timestamp: new Date(),
       details: err?.stack || String(error),
       stack: err?.stack,
+      source,
     };
     setErrors(prev => [...prev, errorInfo]);
   }, []);
@@ -66,48 +69,75 @@ export const ErrorProvider: React.FC<ErrorProviderProps> = ({ children }) => {
     setErrors([]);
   }, []);
 
+  const hasCriticalErrors = errors.some(e => e.type === 'critical');
+
+  useEffect(() => {
+    const handleGlobalError: OnErrorEventHandler = (msg, url, lineNo, columnNo, error) => {
+      const errorMessage = typeof msg === 'string' ? msg : 'Unknown error';
+      const errorInfo: ErrorInfo = {
+        id: `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        message: errorMessage,
+        type: 'critical',
+        timestamp: new Date(),
+        details: `URL: ${url}\nLine: ${lineNo}\nColumn: ${columnNo}\n\n${error?.stack || ''}`,
+        stack: error?.stack,
+        source: 'uncaught',
+      };
+      setErrors(prev => [...prev, errorInfo]);
+      return false;
+    };
+
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      const errorInfo: ErrorInfo = {
+        id: `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        message: event.reason?.message || 'Unhandled Promise Rejection',
+        type: 'error',
+        timestamp: new Date(),
+        details: event.reason?.stack || String(event.reason),
+        stack: event.reason?.stack,
+        source: 'unhandled-rejection',
+      };
+      setErrors(prev => [...prev, errorInfo]);
+    };
+
+    window.onerror = handleGlobalError;
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+    return () => {
+      window.onerror = null;
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
+  }, []);
+
   return (
-    <ErrorContext.Provider value={{ errors, addError, addErrorFromException, removeError, clearErrors }}>
+    <ErrorContext.Provider value={{ 
+      errors, 
+      hasCriticalErrors,
+      addError, 
+      addErrorFromException, 
+      removeError, 
+      clearErrors 
+    }}>
       {children}
     </ErrorContext.Provider>
   );
 };
 
-interface ErrorPanelProps {
-  position?: 'top' | 'bottom';
-}
-
-export const ErrorPanel: React.FC<ErrorPanelProps> = () => {
-  const { errors, removeError, clearErrors } = useError();
+export const ErrorPanel: React.FC = () => {
+  const { errors, removeError, clearErrors, hasCriticalErrors } = useError();
 
   if (errors.length === 0) return null;
 
   const getTypeStyles = (type: ErrorInfo['type']) => {
     switch (type) {
+      case 'critical':
+        return { bg: '#fef2f2', border: '#dc2626', icon: '🔴', text: '#dc2626', headerBg: '#991b1b' };
       case 'error':
-        return {
-          bg: '#fef2f2',
-          border: '#ef4444',
-          icon: '⚠️',
-          text: '#dc2626',
-          headerBg: '#dc2626',
-        };
+        return { bg: '#fef2f2', border: '#ef4444', icon: '⚠️', text: '#dc2626', headerBg: '#dc2626' };
       case 'warning':
-        return {
-          bg: '#fffbeb',
-          border: '#f59e0b',
-          icon: '⚡',
-          text: '#d97706',
-          headerBg: '#f59e0b',
-        };
+        return { bg: '#fffbeb', border: '#f59e0b', icon: '⚡', text: '#d97706', headerBg: '#f59e0b' };
       case 'info':
-        return {
-          bg: '#eff6ff',
-          border: '#3b82f6',
-          icon: 'ℹ️',
-          text: '#2563eb',
-          headerBg: '#3b82f6',
-        };
+        return { bg: '#eff6ff', border: '#3b82f6', icon: 'ℹ️', text: '#2563eb', headerBg: '#3b82f6' };
     }
   };
 
@@ -115,191 +145,253 @@ export const ErrorPanel: React.FC<ErrorPanelProps> = () => {
     return date.toLocaleTimeString();
   };
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
+  const getSourceLabel = (source?: ErrorInfo['source']) => {
+    switch (source) {
+      case 'uncaught': return 'Uncaught Error';
+      case 'unhandled-rejection': return 'Promise Rejection';
+      case 'component': return 'React Component';
+      case 'api': return 'API Error';
+      default: return 'Error';
     }
   };
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        backdropFilter: 'blur(4px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 9999,
-      }}
-      onClick={handleBackdropClick}
-    >
+    <>
+      <style>{`
+        @keyframes errorModalSlideIn {
+          from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+          to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes backdropPulse {
+          0%, 100% { background-color: rgba(0, 0, 0, 0.5); }
+          50% { background-color: rgba(0, 0, 0, 0.7); }
+        }
+        .error-modal-backdrop {
+          animation: backdropPulse 2s ease-in-out infinite;
+        }
+        .error-modal-content {
+          animation: errorModalSlideIn 0.3s ease-out;
+        }
+      `}</style>
+
       <div
+        className="error-modal-backdrop"
         style={{
-          background: '#ffffff',
-          borderRadius: '12px',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
-          maxWidth: '500px',
-          width: '90%',
-          maxHeight: '80vh',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backdropFilter: 'blur(8px)',
           display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          animation: 'errorModalSlideIn 0.2s ease-out',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 99999,
         }}
       >
-        <style>{`
-          @keyframes errorModalSlideIn {
-            from {
-              opacity: 0;
-              transform: scale(0.95) translateY(-10px);
-            }
-            to {
-              opacity: 1;
-              transform: scale(1) translateY(0);
-            }
-          }
-        `}</style>
-
         <div
+          className="error-modal-content"
           style={{
+            background: '#ffffff',
+            borderRadius: '16px',
+            boxShadow: '0 25px 80px rgba(0, 0, 0, 0.4)',
+            maxWidth: '600px',
+            width: '90%',
+            maxHeight: '85vh',
             display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '16px 20px',
-            background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-            color: 'white',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            border: hasCriticalErrors ? '2px solid #dc2626' : '1px solid #e5e7eb',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '24px' }}>⚠️</span>
-            <span style={{ fontWeight: 700, fontSize: '18px' }}>
-              {errors.length} {errors.length === 1 ? 'Issue' : 'Issues'} Detected
-            </span>
-          </div>
-          <button
-            onClick={clearErrors}
+          <div
             style={{
-              background: 'rgba(255, 255, 255, 0.2)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '20px 24px',
+              background: hasCriticalErrors 
+                ? 'linear-gradient(135deg, #991b1b 0%, #dc2626 100%)' 
+                : 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
               color: 'white',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              padding: '6px 14px',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '13px',
-              fontWeight: 500,
-              transition: 'background 0.2s',
             }}
-            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
-            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'}
           >
-            Dismiss All
-          </button>
-        </div>
-
-        <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
-          {errors.map((error, index) => {
-            const styles = getTypeStyles(error.type);
-            return (
-              <div
-                key={error.id}
-                style={{
-                  padding: '16px',
-                  marginBottom: index < errors.length - 1 ? '12px' : 0,
-                  borderRadius: '8px',
-                  background: styles.bg,
-                  border: `2px solid ${styles.border}`,
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '18px' }}>{styles.icon}</span>
-                      <span style={{ fontWeight: 600, color: styles.text, fontSize: '15px' }}>
-                        {error.message}
-                      </span>
-                    </div>
-                    {error.details && (
-                      <details>
-                        <summary style={{ cursor: 'pointer', color: '#6b7280', fontSize: '13px', marginTop: '4px', fontWeight: 500 }}>
-                          View details
-                        </summary>
-                        <pre
-                          style={{
-                            marginTop: '10px',
-                            padding: '12px',
-                            background: '#1f2937',
-                            color: '#f3f4f6',
-                            borderRadius: '6px',
-                            fontSize: '11px',
-                            overflow: 'auto',
-                            maxHeight: '120px',
-                            fontFamily: 'monospace',
-                            lineHeight: 1.5,
-                          }}
-                        >
-                          {error.details}
-                        </pre>
-                      </details>
-                    )}
-                    <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '8px' }}>
-                      {formatTime(error.timestamp)}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => removeError(error.id)}
-                    style={{
-                      background: 'transparent',
-                      border: 'none',
-                      color: '#9ca3af',
-                      cursor: 'pointer',
-                      fontSize: '20px',
-                      padding: '0 4px',
-                      lineHeight: 1,
-                      marginLeft: '8px',
-                    }}
-                    title="Dismiss"
-                  >
-                    ×
-                  </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ fontSize: '28px' }}>🚨</span>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '20px' }}>
+                  {errors.length} {errors.length === 1 ? 'Issue' : 'Issues'} Detected
+                </div>
+                <div style={{ fontSize: '12px', opacity: 0.9, marginTop: '2px' }}>
+                  {hasCriticalErrors ? 'Critical error requires attention' : 'Click outside or dismiss to continue'}
                 </div>
               </div>
-            );
-          })}
-        </div>
+            </div>
+            <button
+              onClick={clearErrors}
+              style={{
+                background: 'rgba(255, 255, 255, 0.2)',
+                color: 'white',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '13px',
+                fontWeight: 600,
+                transition: 'background 0.2s',
+              }}
+              onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
+              onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'}
+            >
+              Dismiss All
+            </button>
+          </div>
 
-        <div
-          style={{
-            padding: '12px 20px',
-            borderTop: '1px solid #e5e7eb',
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: '10px',
-            background: '#f9fafb',
-          }}
-        >
-          <button
-            onClick={clearErrors}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
+            {errors.map((error, index) => {
+              const styles = getTypeStyles(error.type);
+              return (
+                <div
+                  key={error.id}
+                  style={{
+                    padding: '18px',
+                    marginBottom: index < errors.length - 1 ? '16px' : 0,
+                    borderRadius: '12px',
+                    background: styles.bg,
+                    border: `2px solid ${styles.border}`,
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                        <span style={{ fontSize: '20px' }}>{styles.icon}</span>
+                        <span style={{ fontWeight: 700, color: styles.text, fontSize: '16px' }}>
+                          {error.message}
+                        </span>
+                      </div>
+                      
+                      <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                        <span style={{ 
+                          background: styles.headerBg, 
+                          color: 'white', 
+                          padding: '2px 8px', 
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                        }}>
+                          {getSourceLabel(error.source)}
+                        </span>
+                        <span style={{ 
+                          color: '#6b7280', 
+                          fontSize: '11px',
+                          fontWeight: 500,
+                        }}>
+                          {formatTime(error.timestamp)}
+                        </span>
+                      </div>
+
+                      {error.details && (
+                        <details>
+                          <summary style={{ 
+                            cursor: 'pointer', 
+                            color: '#4b5563', 
+                            fontSize: '13px', 
+                            marginTop: '6px', 
+                            fontWeight: 500 
+                          }}>
+                            View technical details
+                          </summary>
+                          <pre
+                            style={{
+                              marginTop: '12px',
+                              padding: '14px',
+                              background: '#1f2937',
+                              color: '#e5e7eb',
+                              borderRadius: '8px',
+                              fontSize: '11px',
+                              overflow: 'auto',
+                              maxHeight: '150px',
+                              fontFamily: '"Fira Code", monospace',
+                              lineHeight: 1.6,
+                            }}
+                          >
+                            {error.details}
+                          </pre>
+                        </details>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => removeError(error.id)}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#9ca3af',
+                        cursor: 'pointer',
+                        fontSize: '24px',
+                        padding: '0 6px',
+                        lineHeight: 1,
+                        marginLeft: '12px',
+                      }}
+                      title="Dismiss"
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div
             style={{
-              background: '#4b5563',
-              color: 'white',
-              border: 'none',
-              padding: '10px 20px',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: 500,
+              padding: '16px 24px',
+              borderTop: '1px solid #e5e7eb',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              background: '#f9fafb',
             }}
           >
-            Close
-          </button>
+            <div style={{ fontSize: '12px', color: '#6b7280' }}>
+              {errors.length} error{errors.length !== 1 ? 's' : ''} • {hasCriticalErrors ? 'Requires attention' : 'May affect functionality'}
+            </div>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                onClick={() => window.location.reload()}
+                style={{
+                  background: '#4b5563',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 18px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                }}
+              >
+                Reload Page
+              </button>
+              <button
+                onClick={clearErrors}
+                style={{
+                  background: '#2563eb',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 18px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                }}
+              >
+                Continue Anyway
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
