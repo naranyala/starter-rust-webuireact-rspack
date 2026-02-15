@@ -329,9 +329,15 @@ class EnhancedEventBus {
           timestamp: event.timestamp,
         });
         
-        // Secure: Use JSON.stringify with proper encoding instead of string interpolation
-        const encodedPayload = encodeURIComponent(JSON.stringify(payload));
-        window.webui.run(`handleFrontendEvent('${encodedPayload}')`);
+        window.webui.call('handleFrontendEvent', payload)
+          .then(response => {
+            if (response && response.error) {
+              console.error('[EventBus] Backend error:', response.error);
+            }
+          })
+          .catch(err => {
+            console.error('[EventBus] Forward to backend error:', err);
+          });
       } catch (error) {
         console.error('[EventBus] Forward to backend error:', error);
       }
@@ -363,6 +369,28 @@ class EnhancedEventBus {
           });
         } catch (error) {
           console.error('[EventBus] Backend event error:', error);
+        }
+      };
+      
+      // Add WebSocket state change handler
+      window.handleWebSocketEvent = (eventJson) => {
+        try {
+          const event = JSON.parse(eventJson);
+          const eventName = event.event || 'websocket.event';
+          
+          // Log WebSocket events
+          if (eventName.startsWith('websocket.')) {
+            console.log(`[WebSocket] ${eventName}`, event.data);
+          }
+          
+          this.emit(eventName, event.data, {
+            source: 'websocket',
+            correlationId: event.correlationId,
+            replyTo: event.replyTo,
+            forwardToBackend: false,
+          });
+        } catch (error) {
+          console.error('[EventBus] WebSocket event error:', error);
         }
       };
     }

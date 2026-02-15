@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useError } from '../utils/ErrorProvider';
+import EnhancedWebSocketHandler, { initEnhancedWebSocket, getEnhancedWebSocket } from '../utils/enhanced-websocket';
 
 declare global {
   interface Window {
     WinBox: any;
+    webui?: any;
     getUsers?: () => void;
     getDbStats?: () => void;
     refreshUsers?: () => void;
@@ -43,11 +45,12 @@ interface User {
 }
 
 const App: React.FC = () => {
-  const { addError, addErrorFromException, errors } = useError();
+  const { addError, addErrorFromException, errors, removeError, clearErrors } = useError();
   const [activeWindows, setActiveWindows] = useState<WindowInfo[]>([]);
   const [dbUsers, setDbUsers] = useState<User[]>([]);
   const [dbStats, setDbStats] = useState({ users: 0, tables: [] as string[] });
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [showErrorPanel, setShowErrorPanel] = useState(false);
 
   const generateSystemInfoHTML = (): string => {
     const now = new Date();
@@ -258,6 +261,40 @@ const App: React.FC = () => {
     tableBody.innerHTML = rows;
   }, [dbUsers]);
 
+  const emitWindowEvent = (eventType: string, windowId: string, windowTitle: string) => {
+    const payload = { event: eventType, window_id: windowId, window_title: windowTitle, timestamp: new Date().toISOString() };
+    
+    // Emit to local event bus
+    import('../utils/event-bus').then(({ emit, EVENT_TYPES }) => {
+      emit(EVENT_TYPES.CUSTOM, payload, { source: 'winbox_events' });
+    });
+    
+    // Call Rust handler via webui.run (most reliable method)
+    if (typeof (window as any).webui !== 'undefined') {
+      try {
+        (window as any).webui.run(`${eventType}()`);
+        console.log(`[WebUI] Called via webui.run: ${eventType}()`);
+      } catch (e) {
+        console.error(`[WebUI] Failed to call ${eventType}:`, e);
+      }
+    } else {
+      // Fallback: try global function
+      const handler = (window as any)[eventType];
+      if (typeof handler === 'function') {
+        try {
+          handler();
+          console.log(`[WebUI] Called global function: ${eventType}`);
+        } catch (e) {
+          console.error(`[WebUI] Failed to call ${eventType}:`, e);
+        }
+      } else {
+        console.warn(`[WebUI] Handler not found: ${eventType}`);
+      }
+    }
+    
+    Logger.info(`Window event: ${eventType}`, { windowId, windowTitle });
+  };
+
   const openWindow = (title: string, content: string, icon: string) => {
     if (!window.WinBox) {
       Logger.error('WinBox is not loaded yet. Please try again in a moment.');
@@ -272,6 +309,7 @@ const App: React.FC = () => {
           existingWindow.minimized = false;
         }
         existingWindow.winboxInstance.focus();
+        emitWindowEvent('window_focused', existingWindow.id, existingWindow.title);
         return prev;
       }
 
@@ -296,12 +334,20 @@ const App: React.FC = () => {
         oncreate: function() {
           this.body.innerHTML = content;
         },
+        onfocus: function() {
+          emitWindowEvent('window_focused', windowId, title);
+          setActiveWindows(prev => prev.map(w => 
+            w.id === windowId ? { ...w, minimized: false } : w
+          ));
+        },
         onminimize: function() {
+          emitWindowEvent('window_minimized', windowId, title);
           setActiveWindows(prev => prev.map(w => 
             w.id === windowId ? { ...w, minimized: true } : w
           ));
         },
         onrestore: function() {
+          emitWindowEvent('window_restored', windowId, title);
           setActiveWindows(prev => prev.map(w => 
             w.id === windowId ? { ...w, minimized: false, maximized: false } : w
           ));
@@ -313,11 +359,13 @@ const App: React.FC = () => {
           this.resize(availableWidth, availableHeight);
           this.move(200, 0);
           
+          emitWindowEvent('window_maximized', windowId, title);
           setActiveWindows(prev => prev.map(w => 
             w.id === windowId ? { ...w, maximized: true } : w
           ));
         },
         onclose: function() {
+          emitWindowEvent('window_closed', windowId, title);
           setActiveWindows(prev => prev.filter(w => w.id !== windowId));
         }
       });
@@ -342,15 +390,18 @@ const App: React.FC = () => {
       ));
     }
     windowInfo.winboxInstance.focus();
+    emitWindowEvent('window_focused', windowInfo.id, windowInfo.title);
   };
 
   const closeWindow = (windowInfo: WindowInfo) => {
+    emitWindowEvent('window_closed', windowInfo.id, windowInfo.title);
     windowInfo.winboxInstance.close();
     setActiveWindows(prev => prev.filter(w => w.id !== windowInfo.id));
   };
 
   const closeAllWindows = () => {
     activeWindows.forEach(windowInfo => {
+      emitWindowEvent('window_closed', windowInfo.id, windowInfo.title);
       windowInfo.winboxInstance.close();
     });
     setActiveWindows([]);
@@ -359,6 +410,7 @@ const App: React.FC = () => {
   const hideAllWindows = () => {
     setActiveWindows(prev => prev.map(w => {
       if (!w.minimized) {
+        emitWindowEvent('window_minimized', w.id, w.title);
         w.winboxInstance.minimize();
         return { ...w, minimized: true, maximized: false };
       }
@@ -383,6 +435,29 @@ const App: React.FC = () => {
   useEffect(() => {
     Logger.info('Application initialized with event bus integration');
 
+    // Initialize enhanced WebSocket handler if webui is available
+    if (window.webui) {
+      const enhancedWs = initEnhancedWebSocket(window.webui);
+      
+      // Setup error handling
+      const unsubscribeError = enhancedWs.onError((error) => {
+        Logger.error('WebSocket error:', error);
+        addErrorFromException(error, 'websocket');
+      });
+      
+      // Setup state change handling
+      const unsubscribeStateChange = enhancedWs.onStateChange((oldState, newState) => {
+        Logger.info('WebSocket state changed', { oldState, newState });
+        // Update UI based on connection state if needed
+      });
+
+      // Cleanup WebSocket handlers
+      return () => {
+        unsubscribeError();
+        unsubscribeStateChange();
+      };
+    }
+
     // Import event bus functions
     import('../utils/event-bus').then(({ subscribe, emit, forwardToBackend, EVENT_TYPES }) => {
       // Subscribe to database events from backend
@@ -394,7 +469,7 @@ const App: React.FC = () => {
           updateSQLiteTable();
         }
       });
-      
+
       // Subscribe to database stats events from backend
       const dbStatsSubscription = subscribe(EVENT_TYPES.CUSTOM, (event) => {
         if (event.data && event.data.event === 'database.stats_received') {
@@ -402,18 +477,27 @@ const App: React.FC = () => {
           setDbStats(event.data.stats || { users: 0, tables: [] });
         }
       });
-      
+
+      // Subscribe to WebSocket events
+      const wsErrorSubscription = subscribe(EVENT_TYPES.CUSTOM, (event) => {
+        if (event.data && event.data.event && event.data.event.startsWith('websocket.')) {
+          Logger.warn('WebSocket event received:', event.data);
+          // Handle WebSocket events
+        }
+      });
+
       // Cleanup subscriptions on unmount
       return () => {
         if (typeof dbUsersSubscription === 'function') dbUsersSubscription();
         if (typeof dbStatsSubscription === 'function') dbStatsSubscription();
+        if (typeof wsErrorSubscription === 'function') wsErrorSubscription();
       };
     });
 
     window.refreshUsers = () => {
       Logger.info('Refreshing users from database via event bus');
       setIsLoadingUsers(true);
-      
+
       // Emit event to request users from backend via event bus
       import('../utils/event-bus').then(({ emit, EVENT_TYPES }) => {
         emit(EVENT_TYPES.CUSTOM, {
@@ -422,7 +506,7 @@ const App: React.FC = () => {
           reason: 'refresh'
         }, { source: 'frontend_app' });
       });
-      
+
       // Also try traditional method if available
       if (window.getUsers) {
         window.getUsers();
@@ -473,7 +557,31 @@ const App: React.FC = () => {
       window.removeEventListener('stats_response', handleStatsResponse);
       window.removeEventListener('resize', handleWindowResize);
     };
-  }, [updateSQLiteTable]);
+  }, [updateSQLiteTable, addErrorFromException]);
+
+  // Add state for WebSocket connection status
+  const [wsConnected, setWsConnected] = useState(false);
+  const [wsStatus, setWsStatus] = useState('disconnected');
+  
+  useEffect(() => {
+    // Update WebSocket status when enhanced WebSocket is available
+    if (window.webui) {
+      const updateWsStatus = () => {
+        const enhancedWs = getEnhancedWebSocket();
+        if (enhancedWs) {
+          const state = enhancedWs.getCurrentState();
+          setWsConnected(state.isConnected);
+          setWsStatus(state.connectionQuality);
+        }
+      };
+      
+      // Update status immediately and then periodically
+      updateWsStatus();
+      const interval = setInterval(updateWsStatus, 5000);
+      
+      return () => clearInterval(interval);
+    }
+  }, []);
 
   return (
     <>
@@ -882,63 +990,7 @@ const App: React.FC = () => {
 
         <div className="main-container">
           <header className="header">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h1>System Dashboard</h1>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  onClick={() => {
-                    addError('This is a demo error!', 'error', 'Stack trace: ErrorProviderDemo\n    at testButton.onClick\n    at App.render');
-                  }}
-                  style={{
-                    background: 'rgba(255,255,255,0.2)',
-                    color: 'white',
-                    border: '1px solid rgba(255,255,255,0.3)',
-                    padding: '6px 12px',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                  }}
-                >
-                  ⚠️ Test Error
-                </button>
-                <button
-                  onClick={() => {
-                    addError('This is a demo warning!', 'warning');
-                  }}
-                  style={{
-                    background: 'rgba(255,255,255,0.2)',
-                    color: 'white',
-                    border: '1px solid rgba(255,255,255,0.3)',
-                    padding: '6px 12px',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                  }}
-                >
-                  ⚡ Test Warning
-                </button>
-                <button
-                  onClick={() => {
-                    try {
-                      throw new Error('Exception from demo button! This is a test error with stack trace.');
-                    } catch (e) {
-                      addErrorFromException(e);
-                    }
-                  }}
-                  style={{
-                    background: 'rgba(255,255,255,0.2)',
-                    color: 'white',
-                    border: '1px solid rgba(255,255,255,0.3)',
-                    padding: '6px 12px',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                  }}
-                >
-                  💥 Test Exception
-                </button>
-              </div>
-            </div>
+            <h1>System Dashboard</h1>
           </header>
 
           <main className="main-content">
@@ -974,6 +1026,235 @@ const App: React.FC = () => {
               </div>
             </section>
           </main>
+        </div>
+      </div>
+
+      {showErrorPanel && errors.length > 0 && (
+        <div style={{
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          width: '400px',
+          maxHeight: '300px',
+          background: '#fff',
+          borderRadius: '8px',
+          boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+          zIndex: 9999,
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            background: '#dc2626',
+            color: 'white',
+            padding: '10px 15px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}>
+            <span style={{ fontWeight: 'bold' }}>Errors ({errors.length})</span>
+            <div>
+              <button
+                onClick={clearErrors}
+                style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', marginRight: '10px' }}
+              >
+                Clear All
+              </button>
+              <button
+                onClick={() => setShowErrorPanel(false)}
+                style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', fontSize: '18px' }}
+              >
+                ×
+              </button>
+            </div>
+          </div>
+          <div style={{ maxHeight: '250px', overflowY: 'auto', padding: '10px' }}>
+            {errors.map((error, idx) => (
+              <div key={error.id} style={{
+                padding: '8px',
+                marginBottom: '8px',
+                background: error.type === 'error' || error.type === 'critical' ? '#fef2f2' : '#fffbeb',
+                borderLeft: `3px solid ${error.type === 'critical' ? '#dc2626' : error.type === 'error' ? '#ef4444' : '#f59e0b'}`,
+                borderRadius: '4px',
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <span style={{ fontWeight: '500', fontSize: '13px' }}>{error.message}</span>
+                  <button
+                    onClick={() => removeError(error.id)}
+                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#999' }}
+                  >
+                    ×
+                  </button>
+                </div>
+                {error.details && (
+                  <pre style={{ fontSize: '11px', color: '#666', marginTop: '5px', whiteSpace: 'pre-wrap' }}>
+                    {error.details}
+                  </pre>
+                )}
+                <span style={{ fontSize: '10px', color: '#999' }}>
+                  {error.timestamp.toLocaleTimeString()} - {error.source}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {/* Tiny Statusbar - Always visible at bottom */}
+      <div 
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '28px',
+          zIndex: 10000,
+          background: 'linear-gradient(90deg, #1e293b 0%, #0f172a 100%)',
+          borderTop: '1px solid #334155',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 12px'
+        }}
+      >
+        {/* Left: WebSocket Status */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            backgroundColor: wsConnected ? '#10b981' : '#ef4444',
+            boxShadow: wsConnected ? '0 0 6px #10b981' : '0 0 6px #ef4444'
+          }}></div>
+          <span style={{ color: 'white', fontSize: '11px' }}>WS: {wsConnected ? 'Connected' : 'Disconnected'}</span>
+          {wsConnected && <span style={{ color: '#94a3b8', fontSize: '11px' }}>({wsStatus})</span>}
+        </div>
+
+        {/* Right: Control Buttons */}
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+          <button
+            onClick={(e) => { e.stopPropagation(); hideAllWindows(); }}
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              color: 'white',
+              border: 'none',
+              padding: '2px 8px',
+              borderRadius: '3px',
+              cursor: 'pointer',
+              fontSize: '10px'
+            }}
+            title="Hide All Windows"
+          >
+            Hide
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); closeAllWindows(); }}
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              color: 'white',
+              border: 'none',
+              padding: '2px 8px',
+              borderRadius: '3px',
+              cursor: 'pointer',
+              fontSize: '10px'
+            }}
+            title="Close All Windows"
+          >
+            Close
+          </button>
+          <button
+            onClick={(e) => { 
+              e.stopPropagation();
+              console.log('[TEST] Testing WebUI...');
+              if (typeof (window as any).test_handler === 'function') {
+                (window as any).test_handler();
+              } else if (typeof (window as any).webui !== 'undefined') {
+                (window as any).webui.run("test_handler()");
+              }
+            }}
+            style={{
+              background: '#10b981',
+              color: 'white',
+              border: 'none',
+              padding: '2px 8px',
+              borderRadius: '3px',
+              cursor: 'pointer',
+              fontSize: '10px'
+            }}
+            title="Test Handler"
+          >
+            Test
+          </button>
+          <button
+            onClick={(e) => { 
+              e.stopPropagation();
+              addError('Demo error from statusbar', 'error');
+            }}
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              color: 'white',
+              border: 'none',
+              padding: '2px 8px',
+              borderRadius: '3px',
+              cursor: 'pointer',
+              fontSize: '10px'
+            }}
+            title="Add Error"
+          >
+            Error
+          </button>
+          <button
+            onClick={(e) => { 
+              e.stopPropagation();
+              addError('Demo warning from statusbar', 'warning');
+            }}
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              color: 'white',
+              border: 'none',
+              padding: '2px 8px',
+              borderRadius: '3px',
+              cursor: 'pointer',
+              fontSize: '10px'
+            }}
+            title="Add Warning"
+          >
+            Warn
+          </button>
+          <button
+            onClick={(e) => { 
+              e.stopPropagation();
+              try { throw new Error('Demo exception!'); } catch (e) { addErrorFromException(e); }
+            }}
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              color: 'white',
+              border: 'none',
+              padding: '2px 8px',
+              borderRadius: '3px',
+              cursor: 'pointer',
+              fontSize: '10px'
+            }}
+            title="Throw Exception"
+          >
+            Excp
+          </button>
+          {errors.length > 0 && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setShowErrorPanel(!showErrorPanel); }}
+              style={{
+                background: errors.some(e => e.type === 'critical') ? '#dc2626' : '#f59e0b',
+                color: 'white',
+                border: 'none',
+                padding: '2px 8px',
+                borderRadius: '3px',
+                cursor: 'pointer',
+                fontSize: '10px',
+                fontWeight: 'bold'
+              }}
+              title="Show Errors"
+            >
+              {errors.length}
+            </button>
+          )}
         </div>
       </div>
     </>

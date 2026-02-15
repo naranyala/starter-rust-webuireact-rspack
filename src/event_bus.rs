@@ -1,11 +1,12 @@
+#![allow(dead_code)]
+
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex, RwLock};
 use std::future::Future;
 use std::pin::Pin;
-use std::time::Duration;
 use tokio::sync::broadcast;
 use serde::{Serialize, Deserialize};
-use tracing::{info, error, debug, warn};
+use tracing::{info, error, debug};
 use anyhow::Result;
 use chrono::Utc;
 use uuid::Uuid;
@@ -422,8 +423,8 @@ impl WebUIEventBridge {
     }
 
     pub async fn send_to_frontend(&self, event: &Event) -> Result<()> {
-        if let Some(ref window) = self.webui_window {
-            let payload = serde_json::json!({
+        if let Some(ref _window) = self.webui_window {
+            let _payload = serde_json::json!({
                 "event": event.name,
                 "timestamp": event.timestamp,
                 "source": event.source,
@@ -438,10 +439,10 @@ impl WebUIEventBridge {
         let event_bus = self.event_bus.clone();
         let pattern = event_pattern.to_string();
 
-        let listener = Arc::new(EventHandler::new(move |event| {
-            let bus = event_bus.clone();
+        let listener = Arc::new(EventHandler::new(move |_event| {
+            let _bus = event_bus.clone();
             Box::pin(async move {
-                info!("Forwarding to frontend: {}", event.name);
+                info!("Forwarding to frontend: {}", _event.name);
                 Ok(())
             })
         }));

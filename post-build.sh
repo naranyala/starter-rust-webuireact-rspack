@@ -10,7 +10,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+TIMESTAMP=$(date -u +"%H:%M:%S")
 LOG_FILE="post-build-${TIMESTAMP}.log"
 
 # Enhanced logging functions
@@ -21,7 +21,7 @@ log() {
     local duration=${4:-""}
     local context=${5:-""}
     
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S%.3N')
+    local timestamp=$(date '+%H:%M:%S')
     local pid=$$
     
     # Create structured log entry
@@ -94,7 +94,11 @@ TARGET_BIN_RELEASE="target/release/$EXECUTABLE_NAME"
 # Rename debug build
 rename_debug_start=$(date +%s.%N)
 if [ -f "$SOURCE_BIN" ]; then
-    if [ "$SOURCE_BIN" != "$TARGET_BIN" ]; then
+    SOURCE_INODE=$(stat -c '%i' "$SOURCE_BIN" 2>/dev/null || echo "0")
+    TARGET_INODE=$(stat -c '%i' "$TARGET_BIN" 2>/dev/null || echo "1")
+    if [ "$SOURCE_INODE" = "$TARGET_INODE" ] && [ -f "$TARGET_BIN" ]; then
+        log_info "Debug binary already named: $EXECUTABLE_NAME (same file)" "RENAME_DEBUG"
+    elif [ "$SOURCE_BIN" != "$TARGET_BIN" ]; then
         log_info "Renaming debug binary: $PACKAGE_NAME -> $EXECUTABLE_NAME" "RENAME_DEBUG"
         mv "$SOURCE_BIN" "$TARGET_BIN"
         log_info "Debug binary renamed successfully" "RENAME_DEBUG"
@@ -111,7 +115,11 @@ log_info "Debug binary renaming completed" "RENAME_DEBUG" "$rename_debug_duratio
 # Rename release build
 rename_release_start=$(date +%s.%N)
 if [ -f "$SOURCE_BIN_RELEASE" ]; then
-    if [ "$SOURCE_BIN_RELEASE" != "$TARGET_BIN_RELEASE" ]; then
+    SOURCE_INODE=$(stat -c '%i' "$SOURCE_BIN_RELEASE" 2>/dev/null || echo "0")
+    TARGET_INODE=$(stat -c '%i' "$TARGET_BIN_RELEASE" 2>/dev/null || echo "1")
+    if [ "$SOURCE_INODE" = "$TARGET_INODE" ] && [ -f "$TARGET_BIN_RELEASE" ]; then
+        log_info "Release binary already named: $EXECUTABLE_NAME (same file)" "RENAME_RELEASE"
+    elif [ "$SOURCE_BIN_RELEASE" != "$TARGET_BIN_RELEASE" ]; then
         log_info "Renaming release binary: $PACKAGE_NAME -> $EXECUTABLE_NAME" "RENAME_RELEASE"
         mv "$SOURCE_BIN_RELEASE" "$TARGET_BIN_RELEASE"
         log_info "Release binary renamed successfully" "RENAME_RELEASE"

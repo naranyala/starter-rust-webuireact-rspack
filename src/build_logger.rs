@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use chrono::Local;
 use lazy_static::lazy_static;
 use std::fmt;
@@ -203,7 +205,6 @@ impl BuildStats {
             Level::DEBUG | Level::TRACE => {
                 self.debug_count.fetch_add(1, Ordering::Relaxed);
             }
-            _ => {}
         }
     }
 
@@ -247,7 +248,6 @@ impl ConsoleWriter {
             Level::INFO => "\x1b[32m",
             Level::DEBUG => "\x1b[36m",
             Level::TRACE => "\x1b[90m",
-            _ => "\x1b[0m",
         };
         let reset = "\x1b[0m";
 

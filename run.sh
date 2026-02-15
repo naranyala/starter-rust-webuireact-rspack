@@ -19,8 +19,8 @@ NC='\033[0m' # No Color
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-LOG_FILE="run-${TIMESTAMP}.log"
+TIMESTAMP=$(date -u +"%H:%M:%SZ")
+LOG_FILE="run.log"
 
 # Enhanced logging functions
 log() {
@@ -30,7 +30,7 @@ log() {
     local duration=${4:-""}
     local context=${5:-""}
     
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S%.3N')
+    local timestamp=$(date '+%H:%M:%S')
     local pid=$$
     
     # Create structured log entry
@@ -181,6 +181,16 @@ build_rust() {
     fi
 
     log_status "Rust build completed!" "RUST_BUILD" "$build_duration"
+    
+    local exe_path=""
+    if [ -f "target/debug/app" ]; then
+        exe_path="target/debug/app"
+    elif [ -f "target/debug/rustwebui-app" ]; then
+        exe_path="target/debug/rustwebui-app"
+    fi
+    log_info "======================================" "RUST_BUILD"
+    log_info "Executable: $exe_path" "RUST_BUILD"
+    log_info "======================================" "RUST_BUILD"
 
     local rust_end=$(date +%s.%N)
     local rust_duration=$(echo "$rust_end $rust_start" | awk '{printf "%.0f", ($1 - $2) * 1000}')

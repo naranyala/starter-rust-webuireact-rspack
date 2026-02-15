@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './use-cases/App';
+import App from './views/App';
 import { ErrorProvider, ErrorPanel, useError } from './utils/ErrorProvider';
 
 const ErrorHandler: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -43,7 +43,6 @@ try {
       <React.StrictMode>
         <ErrorProvider>
           <ErrorHandler>
-            <ErrorPanel />
             <App />
           </ErrorHandler>
         </ErrorProvider>

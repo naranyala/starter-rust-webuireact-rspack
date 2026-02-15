@@ -2,88 +2,111 @@
 
 A modern, production-ready desktop application template combining Rust with React for cross-platform desktop apps.
 
-## Project Structure
+## Project Structure (MVVM Architecture)
 
 ```
 starter-rust-webuireact-rspack/
-├── src/                              # Rust backend source code
+├── src/                              # Rust backend (MVVM)
 │   ├── main.rs                       # Application entry point
-│   ├── core.rs                       # Core infrastructure (config, logging, database)
-│   ├── event_bus.rs                  # Event bus for frontend-backend communication
-│   ├── handlers.rs                   # WebUI event handlers
-│   └── build_logger.rs               # Build-time logging functionality
-├── frontend/                         # React frontend application
+│   ├── models/                       # M - Data models
+│   │   └── mod.rs                   # AppConfig, Database, User, DbStats, SystemInfo
+│   ├── viewmodels/                   # VM - Business logic
+│   │   ├── mod.rs                   # ViewModel exports
+│   │   ├── counter.rs               # Counter handlers
+│   │   ├── user.rs                  # User/DB handlers
+│   │   ├── system.rs                # System info handlers
+│   │   └── utils.rs                 # Utility handlers
+│   ├── infrastructure/               # Core services
+│   │   └── mod.rs                   # Logging, database initialization
+│   ├── event_bus.rs                 # Event bus (frontend-backend comm)
+│   └── build_logger.rs              # Build-time logging
+├── frontend/                         # React frontend (MVVM)
 │   ├── src/
-│   │   ├── main.tsx                  # React application entry point
-│   │   ├── utils.js                  # JavaScript utilities
-│   │   ├── use-cases/
-│   │   │   ├── App.tsx               # Main application component
-│   │   │   └── ErrorDemo.tsx         # Error handling demo
+│   │   ├── main.tsx                 # React entry point
+│   │   ├── models/                  # M - TypeScript types
+│   │   │   └── index.ts            # User, DbStats, ApiResponse interfaces
+│   │   ├── views/                   # V - React components
+│   │   │   ├── App.tsx             # Main application component
+│   │   │   └── ErrorDemo.tsx       # Error handling demo
+│   │   ├── viewmodels/             # VM - React hooks
+│   │   │   └── index.ts            # useCounter, useUsers, useSystemInfo hooks
 │   │   └── utils/
-│   │       ├── ErrorProvider.tsx     # React error context provider
-│   │       └── event-bus.js          # Frontend event bus implementation
-│   ├── rspack.config.ts              # Production bundler configuration
-│   ├── rspack.config.dev.ts          # Development bundler configuration
-│   ├── rspack.config.inline.ts       # Inline asset configuration
-│   ├── package.json                  # Node.js dependencies
-│   ├── tsconfig.json                 # TypeScript configuration
-│   ├── biome.json                    # Code formatting rules
-│   ├── index.html                    # HTML template
-│   └── dist/                         # Compiled frontend (generated)
-├── static/                           # Static assets served by the app
-│   ├── css/                          # Compiled CSS files
-│   └── js/                           # Compiled JavaScript bundles
-├── thirdparty/                       # Third-party dependencies
-│   └── webui-c-src/                  # WebUI C library source
-│       ├── src/
-│       │   ├── webui.c               # Main WebUI implementation
-│       │   ├── webview/              # Platform-specific webview implementations
-│       │   └── civetweb/             # Embedded HTTP server
-│       ├── include/                  # C headers
-│       └── examples/                 # Example applications
-├── Cargo.toml                        # Rust package configuration
-├── Cargo.lock                        # Rust dependency lock file
-├── app.config.toml                   # Runtime configuration
-├── app.db                            # SQLite database (generated)
-├── build.rs                          # Build script for native dependencies
-├── build-frontend.js                 # Frontend production build
-├── build-frontend-inline.js         # Frontend inline build
-├── build-dist.sh                     # Distribution packaging script
-├── run.sh                            # Development run script
-├── post-build.sh                     # Post-build processing script
-├── index.html                        # Root HTML template
-├── README.md                         # This file
-├── EVENT_BUS_DOCS.md                 # Event bus documentation
-└── BUILD_LOGGING.md                  # Build logging documentation
+│   │       ├── ErrorProvider.tsx   # Error context provider
+│   │       └── event-bus.js         # Frontend event bus
+│   ├── rspack.config.ts            # Production bundler config
+│   ├── rspack.config.dev.ts        # Development bundler config
+│   ├── rspack.config.inline.ts     # Inline asset config
+│   ├── package.json                 # Node.js dependencies
+│   ├── tsconfig.json               # TypeScript config
+│   ├── biome.json                  # Code formatting rules
+│   └── dist/                       # Compiled frontend (generated)
+├── static/                          # Static assets
+│   ├── css/                        # Compiled CSS
+│   └── js/                         # Compiled JS bundles
+├── thirdparty/                      # Third-party dependencies
+│   └── webui-c-src/                # WebUI C library
+├── Cargo.toml                       # Rust package config
+├── Cargo.lock                      # Rust lock file
+├── app.config.toml                 # Runtime config
+├── app.db                          # SQLite database
+├── build.rs                        # Build script
+├── build-frontend.js               # Frontend production build
+├── build-frontend-inline.js       # Frontend inline build
+├── build-dist.sh                   # Distribution packaging
+├── run.sh                          # Development run script
+├── post-build.sh                   # Post-build processing
+├── index.html                      # Root HTML template
+├── README.md                       # This file
+├── EVENT_BUS_DOCS.md              # Event bus docs
+└── BUILD_LOGGING.md               # Build logging docs
 ```
+
+## MVVM Architecture
+
+### Model Layer
+- **Rust**: `src/models/` - Data structures (AppConfig, Database, User, DbStats, SystemInfo)
+- **Frontend**: `frontend/src/models/` - TypeScript interfaces
+
+### View Layer
+- **Rust**: WebUI window rendering
+- **Frontend**: `frontend/src/views/` - React components (App.tsx, ErrorDemo.tsx)
+
+### ViewModel Layer
+- **Rust**: `src/viewmodels/` - Business logic handlers (counter, user, system, utils)
+- **Frontend**: `frontend/src/viewmodels/` - React hooks (useCounter, useUsers, useSystemInfo)
+
+### Infrastructure
+- **Rust**: `src/infrastructure/` - Logging, database initialization
+- **Frontend**: `frontend/src/utils/` - ErrorProvider, event-bus
 
 ## Key Components
 
 ### Backend (Rust)
-- **main.rs**: Application entry point with WebUI initialization
-- **core.rs**: Configuration, logging, and database setup
-- **event_bus.rs**: Bidirectional event communication with frontend
-- **handlers.rs**: WebUI event handler implementations
-- **build_logger.rs**: Compile-time logging for builds
+- **main.rs**: Application entry, WebUI init, HTTP server
+- **models/mod.rs**: Data models (AppConfig, Database, User, etc.)
+- **viewmodels/**: Handler modules (counter, user, system, utils)
+- **infrastructure/mod.rs**: Logging and database setup
+- **event_bus.rs**: Bidirectional frontend-backend communication
+- **build_logger.rs**: Compile-time logging
 
 ### Frontend (React + TypeScript)
-- **main.tsx**: React app bootstrap and initialization
-- **use-cases/App.tsx**: Main UI component
-- **use-cases/ErrorDemo.tsx**: Error handling demonstration
+- **main.tsx**: React bootstrap with error handling
+- **models/index.ts**: TypeScript interfaces
+- **views/App.tsx**: Main UI component
+- **viewmodels/index.ts**: Custom React hooks
 - **utils/ErrorProvider.tsx**: Global error context
-- **utils/event-bus.js**: Frontend event bus client
+- **utils/event-bus.js**: Event bus client
 
 ### Build System
 - **rspack**: Fast Rust-based bundler
 - **build-frontend.js**: Production frontend build
 - **build-frontend-inline.js**: Inline asset bundling
-- **build-dist.sh**: Creates distribution packages
+- **build-dist.sh**: Distribution packaging
 
 ## Potential Improvements
 
 ### Code Organization
-- Split large files (`handlers.rs`, `event_bus.rs`, `App.tsx`) into smaller, focused modules
-- Extract shared types to a common `types/` directory for cross-language consistency
+- Split large files (`event_bus.rs`, `App.tsx`) into smaller focused modules
 - Add a `tests/` directory with unit and integration tests
 
 ### Frontend
