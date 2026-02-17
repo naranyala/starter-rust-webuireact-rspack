@@ -4,7 +4,7 @@ use lazy_static::lazy_static;
 use std::sync::{Arc, Mutex};
 use tracing::{info, error};
 use webui_rs::webui;
-use crate::models::Database;
+use crate::core::Database;
 use crate::event_bus::{emit_counter_increment, emit_counter_reset, emit_event, Event, EventType};
 
 lazy_static! {

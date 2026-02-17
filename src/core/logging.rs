@@ -1,14 +1,12 @@
-#![allow(dead_code)]
-
 use tracing_subscriber::{
     fmt, fmt::format::FmtSpan, fmt::time::Uptime, layer::SubscriberExt, util::SubscriberInitExt,
     EnvFilter,
 };
 
-pub fn init_logging_with_config(
+pub fn init_logging(
     log_file: Option<&str>,
     log_level: &str,
-    append: bool,
+    _append: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let filter_layer = EnvFilter::try_from_default_env()
         .or_else(|_| EnvFilter::try_new(log_level))
@@ -52,13 +50,6 @@ pub fn init_logging_with_config(
     if let Some(file) = log_file {
         tracing::info!("Log file: {}", file);
     }
-    tracing::info!("Append mode: {}", append);
 
     Ok(())
-}
-
-pub fn init_database(db_path: &str) -> Result<crate::models::Database, Box<dyn std::error::Error>> {
-    let db = crate::models::Database::new(db_path)?;
-    db.init()?;
-    Ok(db)
 }

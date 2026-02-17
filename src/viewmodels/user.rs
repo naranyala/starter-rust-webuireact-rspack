@@ -2,7 +2,8 @@ use std::sync::Arc;
 use tracing::{info, error, debug};
 use webui_rs::webui;
 use serde_json::json;
-use crate::models::{Database, User};
+use crate::core::Database;
+use crate::models::User;
 use crate::event_bus::{emit_users_fetched, emit_event, Event, EventType};
 
 pub fn setup_user_viewmodel(window: &mut webui::Window) {
